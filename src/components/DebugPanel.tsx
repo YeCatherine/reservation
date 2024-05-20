@@ -5,6 +5,7 @@ import {
   AccordionSummary,
   Typography,
 } from '@mui/material';
+
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 interface DebugPanelProps {
