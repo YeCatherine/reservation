@@ -1,10 +1,9 @@
-import { FormControl, MenuItem, Select } from '@mui/material';
 import React from 'react';
+import { FormControl, MenuItem, Select } from '@mui/material';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-
-import { useDay } from '../Calendar/context/DayContext.tsx';
+import { useDay } from '../Calendar/context/DayContext';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -18,13 +17,16 @@ const TimezoneOptions = [
   { label: 'UTC', value: 'UTC' },
 ];
 
-export function TimeZoneSelector() {
-  const {
-    selectedDate,
-    setSelectedDate,
-    selectedTimezone,
-    setSelectedTimezone,
-  } = useDay();
+/**
+ * TimeZoneSelector component
+ *
+ * A component for selecting the time zone.
+ *
+ * @returns {JSX.Element} The rendered component
+ */
+export function TimeZoneSelector(): JSX.Element {
+  const { selectedTimezone, setSelectedTimezone } = useDay();
+
   return (
     <FormControl
       fullWidth
@@ -41,14 +43,14 @@ export function TimeZoneSelector() {
           setSelectedTimezone(e.target.value);
         }}
         sx={{
-          fontSize: '14px', // Ensure readable font size
-          color: 'text.primary', // Ensure high contrast text based on theme
-          padding: '0px 8px', // Reduce padding inside the select
+          fontSize: '14px',
+          color: 'text.primary',
+          padding: '0px 8px',
           '& .MuiSelect-select': {
             display: 'flex',
-            justifyContent: 'center', // Center the text inside the select
+            justifyContent: 'center',
             alignItems: 'center',
-            padding: '4px 0px', // Reduce padding inside the select box
+            padding: '4px 0px',
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
             borderColor: 'text.primary',
@@ -80,17 +82,17 @@ export function TimeZoneSelector() {
             key={option.value}
             value={option.value}
             sx={{
-              fontSize: '14px', // Ensure readable font size
-              color: 'text.primary', // Ensure high contrast text based on theme
-              backgroundColor: 'transparent', // Ensure background is transparent
-              borderBottom: 'none', // Make options borderless
-              padding: '4px 8px', // Reduce padding inside the menu items
-              margin: '0', // Remove margin between options
-              justifyContent: 'center', // Center the text inside the menu item
-              minHeight: '30px', // Ensure a smaller height for the options
+              fontSize: '14px',
+              color: 'text.primary',
+              backgroundColor: 'transparent',
+              borderBottom: 'none',
+              padding: '4px 8px',
+              margin: '0',
+              justifyContent: 'center',
+              minHeight: '30px',
               '&.Mui-selected': {
                 backgroundColor: (theme) =>
-                  theme.palette.mode === 'dark' ? 'grey.700' : 'grey.300', // Change selected background color
+                  theme.palette.mode === 'dark' ? 'grey.700' : 'grey.300',
               },
               '&:hover': {
                 backgroundColor: (theme) =>

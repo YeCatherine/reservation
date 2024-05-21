@@ -4,7 +4,7 @@ export interface Slot {
   start: string;
   end: string;
   timezone?: string;
-  reserved?: number; // will store reservation time
+  reserved?: number;
   booked?: boolean;
 }
 
@@ -15,14 +15,12 @@ export interface Schedule {
   timer?: number | null;
 }
 
-// dateRange?: DateRange;
 export interface Availability {
   date: string;
   start: string;
   end: string;
   timezone?: string;
   timeSlots: Slot[];
-
   selectedDays?: boolean[];
 }
 
