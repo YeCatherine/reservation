@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Availability, Provider, Schedule, Slot } from '../types';
+import { Availability, Provider, Schedule } from '../types';
 import dayjs from 'dayjs';
 import { toast } from 'react-toastify';
 

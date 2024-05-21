@@ -1,10 +1,12 @@
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 import axios from 'axios';
+
 interface User {
   id: string;
   name: string;
   role: string;
 }
+
 interface AuthContextProps {
   user: User;
   userType: string;

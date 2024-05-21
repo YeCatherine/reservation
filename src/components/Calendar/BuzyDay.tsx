@@ -1,7 +1,6 @@
 import React from 'react';
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
 import dayjs, { Dayjs } from 'dayjs';
-import Badge from '@mui/material/Badge';
 import { DATE_TIME_FORMAT } from '../../consts';
 import { Schedule } from '../../types';
 import { ALL_PROVIDERS, useProvider } from '../Client/context/ProviderContext';

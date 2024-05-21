@@ -1,23 +1,10 @@
-import { generateTimeSlots } from '../../utils/generateTimeSlots.tsx';
-import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  Grid,
-  Typography,
-} from '@mui/material';
+import React from 'react';
+import { Card, CardContent, CardHeader, Grid } from '@mui/material';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 
 import DateTimeRangePicker from '../Calendar/DateTimeRangePicker.tsx';
-import { useProvider } from '../Client/context/ProviderContext.tsx';
-import { TimeSlot } from '../../types';
-import { useDay } from '../Calendar/context/DayContext.tsx';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

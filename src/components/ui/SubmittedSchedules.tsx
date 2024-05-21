@@ -4,7 +4,7 @@ import CardContent from '@mui/material/CardContent';
 import { Button, Divider, List, ListItem, ListItemText } from '@mui/material';
 import dayjs from 'dayjs';
 import React from 'react';
-import { Schedule, SubmittedSchedule } from '../types';
+import { Schedule, SubmittedSchedule } from '../../types';
 
 /**
  * Display all submitted schedules.

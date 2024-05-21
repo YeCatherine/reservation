@@ -1,6 +1,6 @@
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { Slot, Reservation } from '../types';
+import { Reservation, Slot } from '../types';
 
 /**
  * Fetch all reservations.

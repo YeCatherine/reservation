@@ -2,19 +2,23 @@
 
 ## Overview
 
-This scheduling app is built using modern technologies to provide an efficient and user-friendly experience for both providers and clients.
+This scheduling app is built using modern technologies to provide an efficient and user-friendly experience for both
+providers and clients.
 
 ## Tech Stack
 
 - **React**
 - **TypeScript**
 - **Material-UI (MUI)**
+- **Dayjs with timezones**
 - **Vite**
 
 ## Helping Tools
 
 - **Prettier**
 - **Husky**
+- **ESLint**
+- **Lint Staged**
 - **Playwright**
 
 ## How to Run the App
@@ -49,12 +53,14 @@ To test the app, use the following demo user credentials:
    - You can book only one slot per iteration.
    - You can delete booked slots by clicking on the slot.
 
-**Note:** To test that the provider page has restricted access, try logging in with `client1` credentials; you will be redirected to the `/login` page.
+**Note:** To test that the provider page has restricted access, try logging in with `client1` credentials; you will be
+redirected to the `/login` page.
 
 ## Technical Details
 
 - **Context Providers:** Utilized for authentication, providers, reservations, and dates.
-- **Libraries and Solutions:** Reused popular libraries for error handling, base layout (theme), routing, and debugging components.
+- **Libraries and Solutions:** Reused popular libraries for error handling, base layout (theme), routing, and debugging
+  components.
 - **Testing:** Added Playwright tests for main components.
 - **Design:** Used corporate colors for the light theme.
 - **API Emulation:** Used Mirage to emulate API interactions.

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Grid } from '@mui/material';
+import { Grid } from '@mui/material';
 import axios from 'axios';
 import { Schedule, Slot } from '../types';
 import { DATE_TIME_FORMAT, Role } from '../consts';
@@ -11,20 +11,13 @@ import timezone from 'dayjs/plugin/timezone';
 import { SubmittedSchedules } from '../components/Provider/SubmittedProviderSchedules.tsx';
 import { useAuth } from '../components/Auth/context/AuthContext.tsx';
 import NoAccess from './NoAccess.tsx';
-import {
-  ALL_PROVIDERS,
-  useProvider,
-} from '../components/Client/context/ProviderContext.tsx';
 import PageLayout from '../components/ui/PageLayout.tsx';
 import { CommonCalendar } from '../components/Calendar/CommonCalendar.tsx';
-import SelectTimeSlots from '../components/Provider/SelectTimeSlots.tsx';
 import { useDay } from '../components/Calendar/context/DayContext.tsx';
 import DateTimeRangePicker from '../components/Calendar/DateTimeRangePicker.tsx';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-
-const guessTZ = dayjs.tz.guess();
 
 /**
  * Fetch schedules from the API.
@@ -50,7 +43,7 @@ const ProviderPage: React.FC = () => {
     fetchSchedules(setSchedules);
   }, []);
 
-  const [selectedDateSlots, setSelectedDateSlots] = useState<Slot[]>([]);
+  const [_, setSelectedDateSlots] = useState<Slot[]>([]);
 
   useEffect(() => {
     if (selectedDate) {

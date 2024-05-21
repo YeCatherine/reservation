@@ -153,14 +153,6 @@ const ClientPage: React.FC = () => {
       setIntervalId(newIntervalId);
 
       if (currentProvider === ALL_PROVIDERS) {
-        const providersForSlot = providers.filter((provider) => {
-          const schedule = provider.schedules.find(
-            (s) => s.date === selectedDate?.format(DATE_TIME_FORMAT)
-          );
-          return schedule?.slots.some(
-            (s) => s.start === slot.start && s.end === slot.end
-          );
-        });
         setCurrentProvider(null);
       }
     }

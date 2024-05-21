@@ -268,8 +268,6 @@ export function makeServer({ environment = 'development' } = {}) {
     routes() {
       this.namespace = 'api';
       const providerAvailability = {};
-      const reservations = {};
-      const bookedSlots = {};
       this.get('/providers', (schema) => {
         return schema.providers.all().models;
       });

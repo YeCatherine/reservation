@@ -11,16 +11,6 @@ import { Link, useLocation } from 'react-router-dom';
 const LoginSection: React.FC = () => {
   const { user, login, logout } = useAuth();
   const location = useLocation();
-  const [username, setUsername] = useState('provider');
-  const [password, setPassword] = useState('provider');
-
-  /**
-   * Handles the form submission for login.
-   */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await login(username, password);
-  };
 
   return (
     <Box display="flex" alignItems="center">

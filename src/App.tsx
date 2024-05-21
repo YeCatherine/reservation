@@ -8,7 +8,7 @@ import './App.css';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Providers from './components/AppProviders.tsx';
+import Providers from './components/ui/AppProviders.tsx';
 
 const App: React.FC = () => {
   return (
