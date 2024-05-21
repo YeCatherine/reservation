@@ -13,7 +13,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import { useDay } from '../Calendar/context/DayContext';
 import { ReservationStatus } from '../../consts';
-
+import { useReservations } from '../Reservations/context/ReservationContext.tsx';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -52,7 +52,8 @@ const SelectTimeSlots: React.FC<{
    * @param {Object} slot - The time slot object.
    * @returns {Object} The status and tooltip text for the slot.
    */
-  const getSlotStatus = (slot: any) => {
+  const getSlotStatus = (slot) => {
+    const { reservations } = useReservations();
     const bookedSlot = todaysBookedSlots?.find(
       (booked) =>
         booked.slot.start === slot.start && booked.slot.end === slot.end
@@ -82,6 +83,14 @@ const SelectTimeSlots: React.FC<{
       }
     }
 
+    if (
+      reservations?.find(
+        (reserved) =>
+          reserved.slot.start === slot.start && reserved.slot.end === slot.end
+      )
+    ) {
+      return { isReserved: true, tooltipText: 'Reserved' };
+    }
     return {};
   };
 

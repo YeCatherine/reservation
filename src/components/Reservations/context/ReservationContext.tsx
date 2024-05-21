@@ -99,8 +99,10 @@ export const ReservationProvider: React.FC<{ children: ReactNode }> = ({
 
   const removeReservation = async (id: number): Promise<void> => {
     await deleteReservation(id);
-    if (reservation.id === id) setReservation(null);
-    setReservations((prev) => prev.filter((res) => res.id !== id));
+    if (reservation && reservation.id === id) setReservation(null);
+    setReservations((prev) => {
+      return prev.filter((res) => res.id !== id);
+    });
   };
 
   useEffect(() => {
