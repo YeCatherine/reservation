@@ -131,6 +131,34 @@ const Login: React.FC = () => {
           >
             Login
           </Button>
+          {process.env.NODE_ENV === 'development' && (
+            <>
+              <Button
+                variant="outlined"
+                color="primary"
+                fullWidth
+                style={{ marginTop: '1rem' }}
+                onClick={() => {
+                  login('provider1', 'provider1');
+                  navigate('/provider');
+                }}
+              >
+                Authorize as Demo Provider
+              </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                fullWidth
+                style={{ marginTop: '1rem' }}
+                onClick={() => {
+                  login('client1', 'client1');
+                  navigate('/provider');
+                }}
+              >
+                Authorize as Demo client
+              </Button>
+            </>
+          )}
         </form>
       </Paper>
     </Container>

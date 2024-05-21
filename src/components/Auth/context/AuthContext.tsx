@@ -27,12 +27,7 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // @todo remove that hardcoded user.
-  const [user, setUser] = useState({
-    id: 'provider1',
-    name: 'provider1',
-    password: 'provider1',
-    role: 'provider',
-  });
+  const [user, setUser] = useState(null);
   const [userType, setUserType] = useState('');
 
   const login = async (username: string, password: string) => {
