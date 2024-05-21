@@ -7,10 +7,10 @@ import React from 'react';
 import {
   ALL_PROVIDERS,
   useProvider,
-} from '../components/Client/context/ProviderContext.tsx';
-import { deleteProviderAvailability } from '../utils/providersService.ts';
+} from '../Client/context/ProviderContext.tsx';
+import { deleteProviderAvailability } from '../../utils/providersService.ts';
 
-import { TimeSlot } from '../types';
+import { TimeSlot } from '../../types';
 
 /**
  * Display all submitted schedules.

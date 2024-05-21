@@ -43,7 +43,7 @@ export function SelectProvidersSection(): JSX.Element | null {
           sx={{ gap: '10px' }}
         >
           <Typography variant="h5" align="center" color="text.secondary">
-            Select Exact Provider
+            Select Provider
           </Typography>
           {reservation.slot.availableProviders.map((providerId) => (
             <Grid item key={providerId} sx={{ m: 0, p: '0px !important' }}>

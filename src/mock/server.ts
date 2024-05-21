@@ -105,6 +105,12 @@ export function makeServer({ environment = 'development' } = {}) {
             end: '15:00',
           },
           {
+            date: dayjs().add(2, 'day').format(DATE_TIME_FORMAT),
+            timezone: 'PST',
+            start: '08:00',
+            end: '15:00',
+          },
+          {
             date: dayjs().add(10, 'day').format(DATE_TIME_FORMAT),
             timezone: 'PST',
             start: '08:00',
@@ -180,8 +186,14 @@ export function makeServer({ environment = 'development' } = {}) {
           {
             date: dayjs().add(1, 'day').format(DATE_TIME_FORMAT),
             timezone: 'PST',
+            start: '08:00',
+            end: '15:00',
+          },
+          {
+            date: dayjs().add(2, 'day').format(DATE_TIME_FORMAT),
+            timezone: 'PST',
             start: '10:00',
-            end: '13:00',
+            end: '15:00',
           },
           {
             date: dayjs().add(3, 'day').format(DATE_TIME_FORMAT),

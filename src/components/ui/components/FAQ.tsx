@@ -60,9 +60,10 @@ export default function FAQ() {
               gutterBottom
               sx={{ maxWidth: { sm: '100%', md: '70%' } }}
             >
-              You can use username `client` and password `client` to authorize
-              as client or You can use username `provider` and password
-              `provider` to authorize as provider
+              You can use username <strong>`client1`</strong> and password{' '}
+              <strong>`client1`</strong> to authorize as client or you can use
+              username <strong>`provider1`</strong> and password{' '}
+              <strong>`provider1`</strong> to authorize as provider
             </Typography>
           </AccordionDetails>
         </Accordion>
@@ -86,7 +87,7 @@ export default function FAQ() {
               sx={{ maxWidth: { sm: '100%', md: '70%' } }}
             >
               1. React, Typescript, MUI, Vite. 2. MirageJS for mocking API. 3.
-              Dayjs for date manipulations.
+              Dayjs for date manipulations. 4.Playwright for testing
             </Typography>
           </AccordionDetails>
         </Accordion>

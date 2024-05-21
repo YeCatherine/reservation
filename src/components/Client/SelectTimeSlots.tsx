@@ -57,17 +57,31 @@ const SelectTimeSlots: React.FC<{
       (booked) =>
         booked.slot.start === slot.start && booked.slot.end === slot.end
     );
+    const currentTime = dayjs().tz(guessTZ);
+    const next24Hours = currentTime.add(24, 'hours');
+
+    const slotStart = dayjs.tz(
+      `${selectedDate.format('YYYY-MM-DD')} ${slot.start}`,
+      'YYYY-MM-DD HH:mm',
+      guessTZ
+    );
+    const disabled = slotStart.isBefore(next24Hours);
+
+    if (disabled) {
+      return { isDisabled: true, tooltipText: 'Please book in 24 hours ahead' };
+    }
 
     if (bookedSlot) {
       switch (bookedSlot.status) {
         case ReservationStatus.CONFIRMED:
           return { isBooked: true, tooltipText: 'Booked' };
         case ReservationStatus.PENDING:
-          return { isReserved: true, tooltipText: 'Pending' };
+          return { isReserved: true, tooltipText: 'Reserved' };
         default:
           return {};
       }
     }
+
     return {};
   };
 
@@ -93,7 +107,8 @@ const SelectTimeSlots: React.FC<{
       >
         <Grid container spacing={0.5}>
           {availableSlots.map((slot, index) => {
-            const { isBooked, isReserved, tooltipText } = getSlotStatus(slot);
+            const { isDisabled, isBooked, isReserved, tooltipText } =
+              getSlotStatus(slot);
             const isSelected = isSlotSelected(slot);
 
             return (
@@ -101,13 +116,21 @@ const SelectTimeSlots: React.FC<{
                 <Tooltip title={tooltipText || ''}>
                   <Box>
                     <Button
-                      variant={isBooked ? 'text' : 'outlined'}
+                      variant={
+                        isBooked ? 'text' : isReserved ? null : 'outlined'
+                      }
                       onClick={() => handleSlotClick(slot)}
-                      disabled={isBooked || isReserved}
+                      disabled={isDisabled || isBooked || isReserved}
+                      size={'small'}
                       sx={{
                         margin: 0.5,
+
                         padding: '2px 4px',
                         minWidth: '60px',
+                        cursor:
+                          isDisabled || isBooked || isReserved
+                            ? 'not-allowed'
+                            : 'pointer',
                         textDecoration: isBooked ? 'line-through' : 'none',
                         backgroundColor: isSelected
                           ? 'primary.light'
