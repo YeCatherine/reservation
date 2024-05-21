@@ -1,18 +1,16 @@
 import React from 'react';
+import { Reservation } from '../../utils/reservationService';
 import {
   Card,
   CardContent,
   CardHeader,
-  Divider,
   List,
   ListItem,
   ListItemText,
 } from '@mui/material';
 import dayjs from 'dayjs';
-import DebugPanel from '../DebugPanel';
 import { ReservationActions } from './ReservationActions';
 import { useReservations } from './context/ReservationContext';
-import { Reservation } from '../../utils/reservationService';
 
 /**
  * Reservations component
@@ -57,7 +55,6 @@ const Reservations: React.FC = () => {
           '&:last-child': { paddingBottom: 0 },
         }}
       >
-        <Divider />
         <List>
           {reservations.map((reservation) => (
             <ListItem

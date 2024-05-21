@@ -16,22 +16,22 @@ import { ALL_PROVIDERS, useProvider } from '../Client/context/ProviderContext';
  */
 export function BuzyDay(
   props: PickersDayProps<Dayjs> & { schedules?: Schedule[] }
-) {
+): JSX.Element {
   const { day, outsideCurrentMonth, schedules = [], ...other } = props;
   const { availableSlots } = useProvider<number | 'provider1'>(ALL_PROVIDERS);
 
   const currentDate = day.format(DATE_TIME_FORMAT);
   const today = dayjs().format(DATE_TIME_FORMAT);
+  let backgroundColor = 'inherit';
   const isBefore = dayjs(currentDate).isBefore(today);
 
-  let backgroundColor = 'inherit';
   if (availableSlots) {
     const foundSlot = availableSlots.find((slot) => slot.date === currentDate);
     if (foundSlot) {
       backgroundColor = 'secondary.light';
-      if (isBefore) {
-        backgroundColor = 'reserved.light';
-      }
+    }
+    if (isBefore && foundSlot) {
+      backgroundColor = 'reserved.light';
     }
   }
 
@@ -56,13 +56,13 @@ export function BuzyDay(
       <PickersDay
         {...other}
         outsideCurrentMonth={outsideCurrentMonth}
-        day={day}
         sx={{ backgroundColor }}
+        day={day}
       />
     );
   }
 
-  // Show markers for days in the future with booked slots.
+  // Show markers for days in future with booked slots.
   const badgeContent = slotCount > 0 && !isBefore ? slotCount : undefined;
 
   return (

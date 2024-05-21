@@ -26,13 +26,12 @@ const TimezoneOptions = [
  */
 export function TimeZoneSelector(): JSX.Element {
   const { selectedTimezone, setSelectedTimezone } = useDay();
-
   return (
     <FormControl
       fullWidth
       margin="normal"
       sx={{
-        width: '120px', // Adjust the width to make the switcher more narrow
+        width: '120px',
       }}
     >
       <Select
@@ -71,9 +70,9 @@ export function TimeZoneSelector(): JSX.Element {
           },
           '& .MuiOutlinedInput-input': {
             backgroundColor: (theme) =>
-              theme.palette.mode === 'dark' ? 'grey.900' : 'inherit', // Ensure not transparent in dark mode
-            textAlign: 'center', // Center the text inside the input
-            padding: '4px 8px', // Reduce padding inside the input box
+              theme.palette.mode === 'dark' ? 'grey.900' : 'inherit',
+            textAlign: 'center',
+            padding: '4px 8px',
           },
         }}
       >

@@ -1,38 +1,40 @@
 import React from 'react';
+import { useModal } from '../ui/Modal/context/ModalProvider';
 import { Box, Button } from '@mui/material';
 import { Check as CheckIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { useModal } from '../ui/Modal/context/ModalProvider';
 import { useReservations } from './context/ReservationContext';
 import { ConfirmationDialog } from '../ui/Modal/ConfirmationDialog';
-import { Reservation } from '../../utils/reservationService';
+import { ReservationStatus } from '../../consts';
+
+interface ReservationActionsProps {
+  reservation: any;
+}
 
 /**
  * ReservationActions component
  *
- * A component for displaying action buttons for a reservation.
+ * A component for managing actions on reservations such as confirming and deleting.
  *
- * @param {Reservation} reservation - The reservation object
+ * @param {ReservationActionsProps} props - The component props.
  */
-export function ReservationActions({
-  reservation,
-}: {
-  reservation: Reservation;
-}): JSX.Element {
+export function ReservationActions({ reservation }: ReservationActionsProps) {
   const { openModal, closeModal } = useModal();
   const { removeReservation, updateExistingReservation } = useReservations();
   const confirmRegistrationModalId = 'confirmationReservationDialog';
   const deleteRegistrationModalId = 'deleteReservationDialog';
 
   /**
-   * Handle reservation confirmation.
+   * Handle confirmation of a reservation.
    */
   const onConfirmRegistration = () => {
-    updateExistingReservation(reservation.id, { status: 'confirmed' });
+    updateExistingReservation(reservation.id, {
+      status: ReservationStatus.CONFIRMED,
+    });
     closeModal(confirmRegistrationModalId);
   };
 
   /**
-   * Handle reservation deletion.
+   * Handle deletion of a reservation.
    */
   const onConfirmDelete = () => {
     removeReservation(reservation.id);
@@ -41,7 +43,7 @@ export function ReservationActions({
 
   return (
     <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-      {reservation.status === 'pending' && (
+      {reservation.status === ReservationStatus.PENDING && (
         <Button
           variant="contained"
           color="primary"
@@ -67,13 +69,13 @@ export function ReservationActions({
       <ConfirmationDialog
         modalId={confirmRegistrationModalId}
         modalTitle="Confirm Your Reservation"
-        modalText={`Do you want to confirm your reservation for ${reservation.date}? Slot: ${reservation.slot.start} - ${reservation.slot.end}`}
+        modalText={`Do you want to confirm your reservation for ${reservation.date}. Slot: ${reservation.slot.start} - ${reservation.slot.end}?`}
         onConfirm={onConfirmRegistration}
       />
       <ConfirmationDialog
         modalId={deleteRegistrationModalId}
         modalTitle="Confirm to Delete Reservation"
-        modalText={`Do you want to delete your reservation for ${reservation.date}? Slot: ${reservation.slot.start} - ${reservation.slot.end}`}
+        modalText={`Do you want to delete your reservation for ${reservation.date}. Slot: ${reservation.slot.start} - ${reservation.slot.end}?`}
         onConfirm={onConfirmDelete}
       />
     </Box>

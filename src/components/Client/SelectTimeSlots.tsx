@@ -11,6 +11,8 @@ import {
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import { useDay } from '../Calendar/context/DayContext';
+import { ReservationStatus } from '../../consts';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -29,26 +31,65 @@ const guessTZ = dayjs.tz.guess();
  * @param {React.ReactNode} children - Child components
  * @returns {JSX.Element | string | null} The rendered component, "no available slots" message, or null if no date is selected
  */
-export function SelectTimeSlots({
-  date,
+const SelectTimeSlots: React.FC<{
+  availableSlots: any[];
+  selectedSlot: any;
+  handleSlotClick: (slot: any) => void;
+  todaysBookedSlots: any[];
+}> = ({
   availableSlots,
   selectedSlot,
   handleSlotClick,
-  children,
-}) {
-  if (!date) {
+  todaysBookedSlots,
+}) => {
+  const { selectedDate } = useDay();
+
+  if (!selectedDate) {
     return null;
   }
-  if (!availableSlots) {
-    return 'no available slots';
+
+  if (!availableSlots || availableSlots.length === 0) {
+    return 'No available slots';
   }
+
+  /**
+   * Get the status of a slot.
+   * @param {Object} slot - The time slot object.
+   * @returns {Object} The status and tooltip text for the slot.
+   */
+  const getSlotStatus = (slot: any) => {
+    const bookedSlot = todaysBookedSlots?.find(
+      (booked) =>
+        booked.slot.start === slot.start && booked.slot.end === slot.end
+    );
+
+    if (bookedSlot) {
+      switch (bookedSlot.status) {
+        case ReservationStatus.CONFIRMED:
+          return { isBooked: true, tooltipText: 'Booked' };
+        case ReservationStatus.PENDING:
+          return { isReserved: true, tooltipText: 'Pending' };
+        default:
+          return {};
+      }
+    }
+    return {};
+  };
+
+  /**
+   * Check if a slot is selected.
+   * @param {Object} slot - The time slot object.
+   * @returns {boolean} Whether the slot is selected.
+   */
+  const isSlotSelected = (slot: any) =>
+    selectedSlot?.start === slot.start && selectedSlot?.end === slot.end;
 
   return (
     <Card sx={{ padding: 2 }}>
       <CardHeader
         title={
-          date
-            ? date.format('dddd, MMMM D, YYYY')
+          selectedDate
+            ? selectedDate.format('dddd, MMMM D, YYYY')
             : 'Select a date to see available time slots'
         }
       />
@@ -57,47 +98,26 @@ export function SelectTimeSlots({
       >
         <Grid container spacing={0.5}>
           {availableSlots.map((slot, index) => {
-            const isSelected =
-              selectedSlot &&
-              selectedSlot.start === slot.start &&
-              selectedSlot.end === slot.end;
+            const { isBooked, isReserved, tooltipText } = getSlotStatus(slot);
+            const isSelected = isSlotSelected(slot);
 
-            let isReserved = slot.reserved;
-            let remainingText = '';
-            if (slot.reserved) {
-              const reservedDate = dayjs.unix(slot.reserved);
-              const remainingTime = dayjs()
-                .tz(guessTZ)
-                .diff(dayjs.unix(slot.reserved), 'second');
-              if (remainingTime < 0) {
-                isReserved = false;
-              } else {
-                isReserved = true;
-                remainingText = `Remaining : (${Math.floor(remainingTime / 60)}:${remainingTime % 60})`;
-              }
-            } else {
-              isReserved = false;
-              remainingText = '';
-            }
-            const toolTipText = slot.tooltip ? slot.tooltip : '';
             return (
               <Grid item xs={6} sm={4} md={2.4} key={index}>
-                <Tooltip title={toolTipText}>
+                <Tooltip title={tooltipText || ''}>
                   <Box>
                     <Button
-                      variant="outlined"
+                      variant={isBooked ? 'text' : 'outlined'}
                       onClick={() => handleSlotClick(slot)}
-                      disabled={slot.disabled}
+                      disabled={isBooked || isReserved}
                       sx={{
                         margin: 0.5,
                         padding: '2px 4px',
                         minWidth: '60px',
-                        textDecoration:
-                          slot.state === 'booked' ? 'line-through' : 'none',
+                        textDecoration: isBooked ? 'line-through' : 'none',
                         backgroundColor: isSelected
                           ? 'primary.light'
                           : isReserved
-                            ? 'reserved.light'
+                            ? 'yellow.200'
                             : 'inherit',
                         borderColor: isSelected ? 'primary.main' : 'grey.300',
                       }}
@@ -113,4 +133,6 @@ export function SelectTimeSlots({
       </CardContent>
     </Card>
   );
-}
+};
+
+export default SelectTimeSlots;

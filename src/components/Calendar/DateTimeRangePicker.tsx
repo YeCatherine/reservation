@@ -4,13 +4,12 @@ import { Button, Chip, Grid, TextField } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import { DATE_TIME_FORMAT } from '../../consts';
-import { useAuth } from '../Auth/context/AuthContext';
+import { useAuth } from '../Auth/context/AuthContext.tsx';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { updateProvidersAvailability } from '../../utils/providersAvailability';
+import { updateProvidersAvailability } from '../../utils/providersService.ts';
 import { DateRange, TimeSlot } from '../../types';
-import { useProvider } from '../Client/context/ProviderContext';
-import { useDay } from './context/DayContext';
-import DebugPanel from '../DebugPanel';
+import { useProvider } from '../Client/context/ProviderContext.tsx';
+import { useDay } from './context/DayContext.tsx';
 
 dayjs.extend(isSameOrBefore);
 
@@ -22,9 +21,7 @@ dayjs.extend(isSameOrBefore);
  * @param {function} setTimeSlots - Function to set time slots
  * @returns {JSX.Element} The rendered component
  */
-const DateTimeRangePicker: React.FC<{
-  setTimeSlots: (slots: TimeSlot[]) => void;
-}> = ({ setTimeSlots }) => {
+const DateTimeRangePicker: React.FC = (): JSX.Element => {
   const { selectedDate, setSelectedDate, selectedTimezone } = useDay();
   const { availableSlots, setAvailableSlots, currentDaySlots } = useProvider();
   const [timeSlot, setTimeSlot] = useState<TimeSlot | null>(currentDaySlots);
@@ -47,16 +44,6 @@ const DateTimeRangePicker: React.FC<{
     end: dayjs().add(1, 'month'),
   });
 
-  const [selectedDays, setSelectedDays] = useState<boolean[]>([
-    false,
-    true,
-    true,
-    true,
-    true,
-    true,
-    false,
-  ]);
-
   useEffect(() => {
     if (selectedDate) {
       setDateRange((prev) => ({
@@ -70,8 +57,8 @@ const DateTimeRangePicker: React.FC<{
 
   /**
    * Handle change of date range.
-   * @param {Dayjs | null} newValue - The new date value
-   * @param {'start' | 'end'} type - The type of date (start or end)
+   * @param {Dayjs | null} newValue - The new date value.
+   * @param {'start' | 'end'} type - The type of date (start or end).
    */
   const handleDateChange = (newValue: Dayjs | null, type: 'start' | 'end') => {
     setDateRange((prev) => ({ ...prev, [type]: newValue }));
@@ -79,13 +66,12 @@ const DateTimeRangePicker: React.FC<{
 
   /**
    * Handle change of time range.
-   * @param {Dayjs | null} newValue - The new time value
+   * @param {Dayjs | null} newValue - The new time value.
    * @param {number} index - The index of the time slot
-   * @param {'start' | 'end'} type - The type of time (start or end)
+   * @param {'start' | 'end'} type - The type of time (start or end).
    */
   const handleTimeChange = (
     newValue: Dayjs | null,
-    index: number,
     type: 'start' | 'end'
   ) => {
     setTimeSlot((prev) => {
@@ -100,16 +86,6 @@ const DateTimeRangePicker: React.FC<{
         [type]: newValue,
       };
     });
-  };
-
-  /**
-   * Handle change of selected days.
-   * @param {number} index - The index of the selected day
-   */
-  const handleDayChange = (index: number) => {
-    const newSelectedDays = [...selectedDays];
-    newSelectedDays[index] = !newSelectedDays[index];
-    setSelectedDays(newSelectedDays);
   };
 
   /**
@@ -137,24 +113,24 @@ const DateTimeRangePicker: React.FC<{
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Grid container spacing={2}>
-        <Grid item xs={5}>
+      <Grid container spacing={2} sx={{ padding: 2 }}>
+        <Grid item lg={6} md={6} xs={12}>
           <TimePicker
             label="Start Time"
             value={preparedTimeSlotStart}
-            onChange={(newValue) => handleTimeChange(newValue, 0, 'start')}
+            onChange={(newValue) => handleTimeChange(newValue, 'start')}
             renderInput={(params) => <TextField {...params} />}
           />
         </Grid>
-        <Grid item xs={5}>
+        <Grid item lg={6} md={6} xs={12}>
           <TimePicker
             label="End Time"
             value={preparedTimeSlotEnd}
-            onChange={(newValue) => handleTimeChange(newValue, 0, 'end')}
-            renderInput={(params) => <TextField {...params} />}
+            onChange={(newValue) => handleTimeChange(newValue, 'end')}
+            renderInput={(params) => <TextField {...params} fullWidth />}
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={12} sx={{ textAlign: 'center' }}>
           {timeSlot === null ? (
             <Chip
               label="Set Default Time"
@@ -163,13 +139,12 @@ const DateTimeRangePicker: React.FC<{
               }
             />
           ) : (
-            <Button variant="contained" onClick={handleSubmit}>
+            <Button variant="contained" onClick={handleSubmit} fullWidth>
               Submit
             </Button>
           )}
         </Grid>
       </Grid>
-      <DebugPanel data={availableSlots} title="available slots" />
     </LocalizationProvider>
   );
 };

@@ -7,9 +7,8 @@ import {
   ExpandMore,
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
-// isSameOrBefore is not a function
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import { useDay } from './context/DayContext.tsx';
+import { useDay } from './context/DayContext';
 
 dayjs.extend(isSameOrBefore);
 
@@ -20,8 +19,7 @@ dayjs.extend(isSameOrBefore);
  *
  * @param {boolean} expanded - Determines if the component is expanded
  * @param {function} handleToggleExpand - Function to toggle expansion
- * @param {dayjs.Dayjs | null} props.minDate - The minimum selectable / allowed date (for clients to allow select only future dates)
- * @returns {JSX.Element | null} The rendered component
+ * @param {dayjs.Dayjs | null} minDate - The minimum selectable / allowed date (for clients to allow select only future dates)
  */
 const DateSelector: React.FC<{
   expanded: boolean;

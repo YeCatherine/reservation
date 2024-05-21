@@ -1,13 +1,21 @@
 import { Dayjs } from 'dayjs';
 
+export type TReservationStatus =
+  | 'available'
+  | 'pending'
+  | 'confirmed'
+  | 'expired';
+
 export interface Slot {
+  id?: string;
   start: string;
   end: string;
+  status?: 'available' | 'reserved' | 'booked';
   timezone?: string;
-  reserved?: number;
-  booked?: boolean;
   disabled?: boolean;
   selected?: boolean;
+  reserved?: number;
+  booked?: boolean;
 }
 
 export interface Schedule {
@@ -27,7 +35,7 @@ export interface Availability {
 }
 
 export interface Provider {
-  id: number;
+  id: number | string;
   name: string;
   schedules: Schedule[];
   availability: Availability[];
@@ -41,21 +49,27 @@ export interface SubmittedSchedule {
 }
 
 export interface TimeSlot {
-  start: Dayjs | null;
-  end: Dayjs | null;
+  id?: string;
+  start: Dayjs | string | null;
+  end: Dayjs | string | null;
+  timezone?: string;
+  status: 'available' | 'booked' | 'reserved';
+  // Providers id available at this time slot.
+  availableProviders: string[];
 }
 
 export interface DateRange {
   start: Dayjs | null;
   end: Dayjs | null;
 }
-type TStatusReservation = 'pending' | 'confirmed' | 'expired';
+
 export interface Reservation {
   id: number;
   clientId: number;
   providerId: string | number;
   date: string;
   slot: Slot;
-  status: TStatusReservation;
+  timer?: number | null;
+  status: TReservationStatus;
   expirationTime: string;
 }

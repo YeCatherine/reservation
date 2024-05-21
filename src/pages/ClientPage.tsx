@@ -3,10 +3,9 @@ import { Box, Grid } from '@mui/material';
 import { Reservation, Schedule } from '../types/index.ts';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DATE_TIME_FORMAT, DEFAULT_TIMER } from '../consts';
-
+import { DATE_TIME_FORMAT, DEFAULT_TIMER, ReservationStatus } from '../consts';
 import { Provider, Slot } from '../types';
-import { SelectTimeSlots } from '../components/Client/SelectTimeSlots.tsx';
+import SelectTimeSlots from '../components/Client/SelectTimeSlots.tsx';
 import { useAuth } from '../components/Auth/context/AuthContext.tsx';
 import {
   ALL_PROVIDERS,
@@ -14,8 +13,7 @@ import {
 } from '../components/Client/context/ProviderContext.tsx';
 import { SelectProvidersSection } from '../components/Client/SelectProvidersSection.tsx';
 import { ReservationSubmit } from '../components/Reservations/ReservationSubmit.tsx';
-import { generateTimeSlots } from '../utils/GenerateTimeSlots.tsx';
-
+import { generateClientTimeSlotsForDay } from '../utils/generateTimeSlots.tsx';
 import PageLayout from '../components/ui/PageLayout.tsx';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -23,9 +21,11 @@ import timezone from 'dayjs/plugin/timezone';
 import { SelectProvider } from '../components/Client/SelectProvider.tsx';
 import { CommonCalendar } from '../components/Calendar/CommonCalendar.tsx';
 import { useDay } from '../components/Calendar/context/DayContext.tsx';
-import DebugPanel from '../components/DebugPanel.tsx';
-import { createReservation } from '../utils/reservationService.tsx';
-import { fetchProviders } from '../utils/providersAvailability.ts';
+import {
+  createReservation,
+  fetchReservations,
+} from '../utils/reservationService.tsx';
+import { fetchProviders } from '../utils/providersService.ts';
 import Reservations from '../components/Reservations/Reservation.tsx';
 import { useReservations } from '../components/Reservations/context/ReservationContext.tsx';
 
@@ -34,63 +34,60 @@ dayjs.extend(timezone);
 
 const guessTZ = dayjs.tz.guess();
 
+/**
+ * ClientPage component for scheduling reservations.
+ */
 const ClientPage: React.FC = () => {
   const { user } = useAuth();
-
   const [providers, setProviders] = useState<Provider[]>([]);
-  const [reservation, setReservation] = useState<Reservation[]>(null);
-  const {
-    reservations,
-    // fetchUserReservations,
-    createNewReservation,
-    updateExistingReservation,
-    removeReservation,
-  } = useReservations();
-  const { currentProvider, setCurrentProvider, currentDaySlots } = useProvider<
-    number | 'provider1'
-  >(ALL_PROVIDERS);
-
-  const { selectedDate, selectedTimezone, setSelectedTimezone } = useDay();
-
+  const [currentSelectedSlot, setCurrentSelectedSlot] = useState<Slot | null>(null);
+  const { reservation, createNewReservation, removeReservation, timer, setTimer } = useReservations();
+  const { currentProvider, setCurrentProvider, currentDaySlots } = useProvider<number | 'provider1'>(ALL_PROVIDERS);
+  const { selectedDate, selectedTimezone } = useDay();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
-
-  const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
-
-  const [timer, setTimer] = useState<number | null>(null);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
-
-  const [availableProvidersForSlot, setAvailableProvidersForSlot] = useState<
-    Provider[]
-  >([]);
-
   const [availableClientSlots, setAvailableClientSlots] = useState<Slot[]>([]);
+  const [todaysBookedSlots, setTodaysBookedSlots] = useState<Reservation[]>([]);
 
+  /**
+   * @brief Fetches today's booked slots on component mount.
+   */
   useEffect(() => {
-    // Set current provider as current user id in case if he is provider..
-    if (!currentDaySlots) {
-      return;
-    }
+    (async () => {
+      const response = await fetchReservations();
+      setTodaysBookedSlots(response);
+    })();
+  }, []);
 
-    const availableClientSlotsResponse = generateTimeSlots(
-      selectedTimezone,
-      currentDaySlots.start,
-      currentDaySlots.end
+  /**
+   * @brief Generates available client slots for the selected day.
+   */
+  useEffect(() => {
+    const availableClientSlotsResponse = generateClientTimeSlotsForDay(
+      providers,
+      selectedDate.format('YYYY-MM-DD')
     );
-    console.log({
-      selectedTimezone,
-      currentDaySlots,
-      availableClientSlotsResponse,
-    });
     setAvailableClientSlots(availableClientSlotsResponse);
-  }, [selectedDate, currentProvider, selectedTimezone, currentDaySlots]);
+  }, [
+    providers,
+    selectedDate,
+    currentProvider,
+    selectedTimezone,
+  ]);
 
+  /**
+   * @brief Fetches providers and their schedules on component mount.
+   */
   useEffect(() => {
     fetchProviders(setProviders, setSchedules);
   }, []);
 
+  /**
+   * @brief Handles the before unload event to warn the user about unsaved changes.
+   */
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (selectedSlot) {
+      if (currentSelectedSlot) {
         event.preventDefault();
         event.returnValue = '';
       }
@@ -101,11 +98,18 @@ const ClientPage: React.FC = () => {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [selectedSlot]);
+  }, [currentSelectedSlot]);
 
+  /**
+   * @brief Handles the click event on a time slot.
+   * @param slot The selected slot.
+   */
   const handleSlotClick = (slot: Slot) => {
     if (!slot.disabled && !slot.reserved) {
-      setSelectedSlot(slot);
+      if (reservation) {
+        removeReservation(reservation.id);
+        setTimer(null);
+      }
       setTimer(DEFAULT_TIMER * 60);
 
       if (intervalId) {
@@ -118,34 +122,32 @@ const ClientPage: React.FC = () => {
             return prev - 1;
           } else {
             clearInterval(newIntervalId);
-            setSelectedSlot(null);
-            // setOpenConfirmDialog(false);
-            //closeModal('confirmationDialog');
             return null;
           }
         });
       }, 1000);
 
-      // debugger;
+      let selectedProvider = null;
+      if (slot.availableProviders.length === 1) {
+        selectedProvider = slot.availableProviders[0];
+      }
+
       const newSubmittedSchedule: Reservation = {
+        clientId: user?.id || null,
         date: selectedDate.format(DATE_TIME_FORMAT),
         slot: slot,
         timer: timer,
-        status: 'pending',
-        providerId: currentProvider,
+        status: ReservationStatus.PENDING,
+        providerId: selectedProvider,
       };
 
       createReservation(newSubmittedSchedule).then((reservation) => {
-        // setSubmittedSchedules([newSubmittedSchedule]); // Replace the previous reservation
-        // @todo new logic
         createNewReservation(reservation);
-        setReservation(reservation);
       });
 
       setIntervalId(newIntervalId);
 
       if (currentProvider === ALL_PROVIDERS) {
-        // debugger;
         const providersForSlot = providers.filter((provider) => {
           const schedule = provider.schedules.find(
             (s) => s.date === selectedDate?.format(DATE_TIME_FORMAT)
@@ -154,19 +156,12 @@ const ClientPage: React.FC = () => {
             (s) => s.start === slot.start && s.end === slot.end
           );
         });
-        setAvailableProvidersForSlot(providersForSlot);
         setCurrentProvider(null);
-      } else {
-        setAvailableProvidersForSlot([]);
       }
     }
   };
 
   const title = 'Scheduling App';
-
-  // Disable access for non-authorized and Provider.
-  // if (!user) return <NoAccess />;
-  // if (user.role !== Role.Client) return <NoAccess />;
 
   return (
     <PageLayout title={title}>
@@ -185,39 +180,19 @@ const ClientPage: React.FC = () => {
           >
             <SelectProvider providers={providers} />
             <CommonCalendar
-              selectedTimezone={selectedTimezone}
-              setSelectedTimezone={setSelectedTimezone}
               schedules={schedules}
               minDate={dayjs().startOf('day')}
-            ></CommonCalendar>
+            />
           </Grid>
           <Grid item xs={12} md={8}>
             <SelectTimeSlots
-              date={selectedDate}
               availableSlots={availableClientSlots}
-              selectedSlot={selectedSlot}
+              selectedSlot={currentSelectedSlot}
+              todaysBookedSlots={todaysBookedSlots}
               handleSlotClick={handleSlotClick}
             />
-            <DebugPanel
-              data={{
-                reservations,
-                createNewReservation,
-                updateExistingReservation,
-                removeReservation,
-              }}
-              title={'availableSlots'}
-              expanded={false}
-            />
-            <SelectProvidersSection
-              selectedSlot={selectedSlot}
-              availableProvidersForSlot={availableProvidersForSlot}
-            />
-            <ReservationSubmit
-              selectedSlot={selectedSlot}
-              availableProvidersForSlot={availableProvidersForSlot}
-              timer={timer}
-              reservation={reservation}
-            />
+            <SelectProvidersSection />
+            <ReservationSubmit />
           </Grid>
         </Grid>
       </LocalizationProvider>

@@ -13,10 +13,16 @@ import {
   Reservation,
   updateReservation,
 } from '../../../utils/reservationService';
-import { useAuth } from '../../Auth/context/AuthContext';
+import { useAuth } from '../../Auth/context/AuthContext.tsx';
+import { ReservationStatus } from '../../../consts';
 
 interface ReservationContextProps {
+  timer: number | null;
+  setTimer: (timer: number | null) => void;
+  reservation: Reservation;
+  setReservation: (reservation: Reservation) => void;
   reservations: Reservation[];
+  // fetchUserReservations: () => void;
   createNewReservation: (
     newReservation: Omit<Reservation, 'id'>
   ) => Promise<Reservation>;
@@ -31,23 +37,14 @@ const ReservationContext = createContext<ReservationContextProps | undefined>(
   undefined
 );
 
-/**
- * ReservationProvider component
- *
- * A context provider for managing reservations.
- *
- * @param {ReactNode} children - Child components
- * @returns {JSX.Element} The rendered component
- */
 export const ReservationProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  const [reservation, setReservation] = useState<Reservation[]>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [timer, setTimer] = useState<number | null>(null);
   const { user } = useAuth();
 
-  /**
-   * Fetch reservations for the current user.
-   */
   const fetchUserReservations = async () => {
     if (user) {
       const fetchedReservations = await fetchReservations();
@@ -57,23 +54,16 @@ export const ReservationProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
-  /**
-   * Create a new reservation.
-   */
   const createNewReservation = async (
     newReservation: Omit<Reservation, 'id'>
   ): Promise<Reservation> => {
     const reservation = await createReservation(newReservation);
     setReservations((prev) => [...prev, reservation]);
+    // Set Current reservation.
+    setReservation(reservation);
     return reservation;
   };
 
-  /**
-   * Update an existing reservation.
-   * @param {number} id - The reservation ID
-   * @param updatedFields - The updated reservation fields
-   * @returns {Promise<Reservation>} The updated reservation
-   */
   const updateExistingReservation = async (
     id: number,
     updatedFields: Partial<Reservation>
@@ -82,16 +72,34 @@ export const ReservationProvider: React.FC<{ children: ReactNode }> = ({
     setReservations((prev) =>
       prev.map((res) => (res.id === id ? updatedReservation : res))
     );
+    if (reservation.id === id) {
+      // If reservation is confirmed, remove it from the context.
+      if (
+        updatedFields.status === ReservationStatus.CONFIRMED ||
+        updatedFields.status === ReservationStatus.EXPIRED
+      ) {
+        setReservation(null);
+      } else {
+        // Update reservation in context.
+        setReservation(updatedReservation);
+      }
+    }
+
     return updatedReservation;
   };
 
   /**
-   * Remove a reservation.
-   * @param {number} id - The reservation ID
-   * @returns {Promise<void>}
+   * Remove current reservation and remove it from databsase when timer is up.
    */
+  useEffect(() => {
+    if (timer === 0 && reservation) {
+      removeReservation(reservation.id);
+    }
+  }, [timer]);
+
   const removeReservation = async (id: number): Promise<void> => {
     await deleteReservation(id);
+    if (reservation.id === id) setReservation(null);
     setReservations((prev) => prev.filter((res) => res.id !== id));
   };
 
@@ -102,7 +110,10 @@ export const ReservationProvider: React.FC<{ children: ReactNode }> = ({
   return (
     <ReservationContext.Provider
       value={{
+        reservation,
         reservations,
+        timer,
+        setTimer,
         createNewReservation,
         updateExistingReservation,
         removeReservation,
@@ -115,14 +126,7 @@ export const ReservationProvider: React.FC<{ children: ReactNode }> = ({
 
 export default ReservationProvider;
 
-/**
- * useReservations hook
- *
- * A hook to use the reservation context.
- *
- * @returns {ReservationContextProps} The reservation context
- */
-export const useReservations = (): ReservationContextProps => {
+export const useReservations = () => {
   const context = useContext(ReservationContext);
   if (!context) {
     throw new Error(

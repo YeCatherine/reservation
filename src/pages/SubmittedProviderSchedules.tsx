@@ -8,22 +8,16 @@ import {
   ALL_PROVIDERS,
   useProvider,
 } from '../components/Client/context/ProviderContext.tsx';
-import DebugPanel from '../components/DebugPanel.tsx';
-import { deleteProviderAvailability } from '../utils/providersAvailability.ts';
+import { deleteProviderAvailability } from '../utils/providersService.ts';
 
-interface TimeSlot {
-  date: string | Date;
-  start: string | Date;
-  end: string | Date;
-  timezone: string;
-}
+import { TimeSlot } from '../types';
 
 /**
  * Display all submitted schedules.
  * @param setSchedules
  * @constructor
  */
-export function SubmittedSchedules({ setSchedules }) {
+export function SubmittedSchedules() {
   const { availableSlots, setAvailableSlots, currentProvider } = useProvider<
     number | 'provider1'
   >(ALL_PROVIDERS);
@@ -75,7 +69,6 @@ export function SubmittedSchedules({ setSchedules }) {
       <CardContent
         sx={{ pr: 1, pl: 1, pt: 0, m: 0, '&:last-child': { paddingBottom: 0 } }}
       >
-        <DebugPanel data={availableSlots} title={'availableSlots'} />
         <Divider />
         <List>
           {availableSlots.map((slot, index) => (

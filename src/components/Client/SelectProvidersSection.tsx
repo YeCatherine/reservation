@@ -1,44 +1,36 @@
-import React from 'react';
 import { Box, Chip, Grid, Paper, Typography } from '@mui/material';
-import { ALL_PROVIDERS, useProvider } from './context/ProviderContext';
-import { useModal } from '../ui/Modal/context/ModalProvider';
+import React from 'react';
+import { useReservations } from '../Reservations/context/ReservationContext';
 
 /**
  * SelectProvidersSection component
  *
- * A component for selecting a specific provider for a given time slot.
- *
- * @param {Object} selectedSlot - The selected time slot
- * @param {Array} availableProvidersForSlot - Array of available providers for the selected slot
- * @returns {JSX.Element | null} The rendered component or null if no providers are available
+ * A component for selecting a specific provider from available options.
  */
-export function SelectProvidersSection({
-  selectedSlot,
-  availableProvidersForSlot,
-}) {
-  const { currentProvider, setCurrentProvider } = useProvider<
-    number | 'provider1'
-  >(ALL_PROVIDERS);
-  const { openModal, closeModal, setModalData, getModalData } = useModal();
-
-  if (!selectedSlot || availableProvidersForSlot.length === 0) {
-    return null;
-  }
+export function SelectProvidersSection(): JSX.Element | null {
+  const { reservation, updateExistingReservation } = useReservations();
 
   /**
-   * Handle chip click event to select a provider.
-   * @param {number | 'provider1'} id - The provider ID
+   * Handle chip click to update the provider for the reservation.
    */
   const handleChipClick = (id: number | 'provider1') => {
-    setCurrentProvider(id);
+    updateExistingReservation(reservation.id, { providerId: id });
   };
 
   /**
-   * Handle chip delete event to reset the provider selection.
+   * Handle delete action to reset the provider selection.
    */
   const handleDelete = () => {
-    setCurrentProvider(ALL_PROVIDERS);
+    updateExistingReservation(reservation.id, { providerId: null });
   };
+
+  if (
+    !reservation ||
+    reservation.slot.availableProviders.length < 1 ||
+    reservation.providerId !== null
+  ) {
+    return null;
+  }
 
   return (
     <Box mt={2}>
@@ -46,22 +38,26 @@ export function SelectProvidersSection({
         <Grid
           container
           spacing={1}
-          justifyContent="center"
-          alignItems="center"
+          justifyContent={'center'}
+          alignItems={'center'}
           sx={{ gap: '10px' }}
         >
           <Typography variant="h5" align="center" color="text.secondary">
             Select Exact Provider
           </Typography>
-          {availableProvidersForSlot.map((provider) => (
-            <Grid item key={provider.id} sx={{ m: 0, p: '0px !important' }}>
+          {reservation.slot.availableProviders.map((providerId) => (
+            <Grid item key={providerId} sx={{ m: 0, p: '0px !important' }}>
               <Chip
-                label={provider.name}
+                label={providerId}
                 clickable
-                color={currentProvider === provider.id ? 'primary' : 'default'}
-                onClick={() => handleChipClick(provider.id)}
+                color={
+                  reservation.providerId === providerId ? 'primary' : 'default'
+                }
+                onClick={() => handleChipClick(providerId)}
                 onDelete={
-                  currentProvider === provider.id ? handleDelete : undefined
+                  reservation.providerId === providerId
+                    ? handleDelete
+                    : undefined
                 }
               />
             </Grid>

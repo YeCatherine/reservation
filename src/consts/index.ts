@@ -29,3 +29,10 @@ export const TOOLTIP_TEXTS = {
   BOOKED: 'This slot is already booked',
   AVAILABLE: 'Click to book',
 };
+
+export enum ReservationStatus {
+  AVAILABLE = 'available',
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  EXPIRED = 'expired',
+}
