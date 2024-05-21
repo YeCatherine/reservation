@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Availability, Provider, Schedule , Slot } from '../types';
+import { Availability, Provider, Schedule, Slot } from '../types';
 import dayjs from 'dayjs';
 import { toast } from 'react-toastify';
 
@@ -112,7 +112,8 @@ export const fetchProviders = async (
     const response = await axios.get('/api/providers');
     setProviders(response.data);
 
-    const preparedSchedule = response.data.reduce((acc: Schedule[], provider: Provider) => {
+    const preparedSchedule = response.data
+      .reduce((acc: Schedule[], provider: Provider) => {
         provider.schedules.forEach((schedule) => {
           const found = acc.find((item) => item.date === schedule.date);
           if (found) {
