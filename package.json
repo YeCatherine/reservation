@@ -9,7 +9,10 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "prepare": "husky install",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "playwright test",
+    "test:ui" : "playwright test --ui",
+    "test:gen": "npx playwright codegen"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -30,6 +33,7 @@
     "react-toastify": "^10.0.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.44.0",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
