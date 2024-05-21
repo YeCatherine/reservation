@@ -6,6 +6,8 @@ export interface Slot {
   timezone?: string;
   reserved?: number;
   booked?: boolean;
+  disabled?: boolean;
+  selected?: boolean;
 }
 
 export interface Schedule {
@@ -47,13 +49,13 @@ export interface DateRange {
   start: Dayjs | null;
   end: Dayjs | null;
 }
-
+type TStatusReservation = 'pending' | 'confirmed' | 'expired';
 export interface Reservation {
   id: number;
   clientId: number;
   providerId: string | number;
   date: string;
   slot: Slot;
-  status: 'pending' | 'confirmed' | 'expired';
+  status: TStatusReservation;
   expirationTime: string;
 }
