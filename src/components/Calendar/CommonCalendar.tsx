@@ -17,7 +17,13 @@ import { useDay } from './context/DayContext';
  * @param {React.ReactNode} props.children - Child components
  * @param {dayjs.Dayjs} [minDate] - Minimum selectable date
  */
-export function CommonCalendar({ schedules, minDate = dayjs().add(1, 'day') }: { schedules: Schedule[], minDate?: dayjs.Dayjs }): JSX.Element {
+export function CommonCalendar({
+  schedules,
+  minDate = dayjs().add(1, 'day'),
+}: {
+  schedules: Schedule[];
+  minDate?: dayjs.Dayjs;
+}): JSX.Element {
   const { selectedDate, setSelectedDate } = useDay();
   const [expanded, setExpanded] = useState(true);
 
@@ -29,18 +35,18 @@ export function CommonCalendar({ schedules, minDate = dayjs().add(1, 'day') }: {
   };
 
   // Collapse calendar on mobile.
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth <= 600) {
-        setExpanded(false);
-      } else {
-        setExpanded(true);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     if (window.innerWidth <= 600) {
+  //       setExpanded(false);
+  //     } else {
+  //       setExpanded(true);
+  //     }
+  //   };
+  //   window.addEventListener('resize', handleResize);
+  //   handleResize();
+  //   return () => window.removeEventListener('resize', handleResize);
+  // }, []);
 
   return (
     <Card>

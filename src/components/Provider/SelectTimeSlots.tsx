@@ -22,10 +22,7 @@ import { useDay } from '../Calendar/context/DayContext.tsx';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export default function SelectTimeSlots({
-  date
-}) {
-
+export default function SelectTimeSlots({ date }) {
   if (!date) {
     return null;
   }
@@ -43,7 +40,7 @@ export default function SelectTimeSlots({
         sx={{ pr: 1, pl: 1, pt: 0, m: 0, '&:last-child': { paddingBottom: 0 } }}
       >
         <Grid container spacing={0.5}>
-          <DateTimeRangePicker/>
+          <DateTimeRangePicker />
         </Grid>
       </CardContent>
     </Card>

@@ -62,23 +62,13 @@ export function BuzyDay(
     );
   }
 
-  // Show markers for days in future with booked slots.
-  const badgeContent = slotCount > 0 && !isBefore ? slotCount : undefined;
-
   return (
-    <Badge
-      key={day.toString()}
-      overlap="circular"
-      color="success"
-      badgeContent={badgeContent}
-    >
-      <PickersDay
-        {...other}
-        outsideCurrentMonth={outsideCurrentMonth}
-        day={day}
-        sx={{ backgroundColor }}
-      />
-    </Badge>
+    <PickersDay
+      {...other}
+      outsideCurrentMonth={outsideCurrentMonth}
+      day={day}
+      sx={{ backgroundColor }}
+    />
   );
 }
 

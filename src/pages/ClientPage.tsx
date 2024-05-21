@@ -40,9 +40,19 @@ const guessTZ = dayjs.tz.guess();
 const ClientPage: React.FC = () => {
   const { user } = useAuth();
   const [providers, setProviders] = useState<Provider[]>([]);
-  const [currentSelectedSlot, setCurrentSelectedSlot] = useState<Slot | null>(null);
-  const { reservation, createNewReservation, removeReservation, timer, setTimer } = useReservations();
-  const { currentProvider, setCurrentProvider, currentDaySlots } = useProvider<number | 'provider1'>(ALL_PROVIDERS);
+  const [currentSelectedSlot, setCurrentSelectedSlot] = useState<Slot | null>(
+    null
+  );
+  const {
+    reservation,
+    createNewReservation,
+    removeReservation,
+    timer,
+    setTimer,
+  } = useReservations();
+  const { currentProvider, setCurrentProvider, currentDaySlots } = useProvider<
+    number | 'provider1'
+  >(ALL_PROVIDERS);
   const { selectedDate, selectedTimezone } = useDay();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
@@ -68,12 +78,7 @@ const ClientPage: React.FC = () => {
       selectedDate.format('YYYY-MM-DD')
     );
     setAvailableClientSlots(availableClientSlotsResponse);
-  }, [
-    providers,
-    selectedDate,
-    currentProvider,
-    selectedTimezone,
-  ]);
+  }, [providers, selectedDate, currentProvider, selectedTimezone]);
 
   /**
    * @brief Fetches providers and their schedules on component mount.

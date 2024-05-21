@@ -19,7 +19,7 @@ import PageLayout from '../components/ui/PageLayout.tsx';
 import { CommonCalendar } from '../components/Calendar/CommonCalendar.tsx';
 import SelectTimeSlots from '../components/Provider/SelectTimeSlots.tsx';
 import { useDay } from '../components/Calendar/context/DayContext.tsx';
-import DateTimeRangePicker from "../components/Calendar/DateTimeRangePicker.tsx";
+import DateTimeRangePicker from '../components/Calendar/DateTimeRangePicker.tsx';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -70,21 +70,11 @@ const ProviderPage: React.FC = () => {
     <PageLayout title={title}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Grid container spacing={2}>
-          <Grid item
-                lg={6}
-                md={12}
-                sm={12}
-                xs={12}
-          >
+          <Grid item lg={6} md={12} sm={12} xs={12}>
             <CommonCalendar schedules={schedules} minDate={null} />
           </Grid>
-          <Grid item lg={6} md={12} sm={12} xs={12} >
-            <DateTimeRangePicker/>
-            {/*<SelectTimeSlots*/}
-            {/*  date={selectedDate}*/}
-            {/*  selectedDateSlots={selectedDateSlots}*/}
-            {/*  handleSlotClick={handleSlotClick}*/}
-            {/*/>*/}
+          <Grid item lg={6} md={12} sm={12} xs={12}>
+            <DateTimeRangePicker />
             <SubmittedSchedules />
           </Grid>
         </Grid>

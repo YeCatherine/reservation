@@ -36,12 +36,7 @@ const SelectTimeSlots: React.FC<{
   selectedSlot: any;
   handleSlotClick: (slot: any) => void;
   todaysBookedSlots: any[];
-}> = ({
-  availableSlots,
-  selectedSlot,
-  handleSlotClick,
-  todaysBookedSlots,
-}) => {
+}> = ({ availableSlots, selectedSlot, handleSlotClick, todaysBookedSlots }) => {
   const { selectedDate } = useDay();
 
   if (!selectedDate) {

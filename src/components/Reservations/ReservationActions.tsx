@@ -63,7 +63,7 @@ export function ReservationActions({ reservation }: ReservationActionsProps) {
         }}
         startIcon={<DeleteIcon />}
       >
-        Delete Reservation
+        Delete
       </Button>
 
       <ConfirmationDialog
