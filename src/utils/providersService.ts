@@ -6,9 +6,8 @@ import { toast } from 'react-toastify';
 
 export const getProviderAvailability = async (providerId) => {
   try {
-    console.log('providerId: ', providerId);
     if (!providerId) return null;
-    console.log('providerId:2 ', providerId);
+
     const response = await fetch(`/api/providers/${providerId}/availability`);
     const data = await response.json();
 

@@ -71,7 +71,6 @@ const DateTimeRangePicker: React.FC = (): JSX.Element => {
       end: timeSlot?.end ? timeSlot.end.format('HH:mm') : null,
     };
 
-    console.log('availability save: ', availability);
     const providerId = user.id;
     const response = await updateProvidersAvailability(
       providerId,

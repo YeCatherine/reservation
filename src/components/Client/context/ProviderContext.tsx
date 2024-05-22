@@ -73,7 +73,6 @@ export const ProviderContextProvider: React.FC<{ children: ReactNode }> = ({
         selectedDate.format('YYYY-MM-DD')
       );
 
-      console.log(exactDay);
       setCurrentDaySlots(exactDay);
     }
 

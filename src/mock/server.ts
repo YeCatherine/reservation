@@ -43,13 +43,13 @@ export function makeServer({ environment = 'development' } = {}) {
         role: 'client',
       });
       server.create('user', {
-        id: nanoid(),
+        id: 'provider1',
         name: 'provider1',
         password: 'provider1',
         role: 'provider',
       });
       server.create('user', {
-        id: nanoid(),
+        id: 'provider2',
         name: 'provider2',
         password: 'provider2',
         role: 'provider',
@@ -335,7 +335,6 @@ export function makeServer({ environment = 'development' } = {}) {
               return dayjs(a.date).unix() - dayjs(b.date).unix();
             }
           );
-          // console.log('updated', provider.availability);
           return provider.availability;
         } else {
           return new Response(
