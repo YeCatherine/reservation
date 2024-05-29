@@ -138,8 +138,8 @@ const Login: React.FC = () => {
                 color="primary"
                 fullWidth
                 style={{ marginTop: '1rem' }}
-                onClick={() => {
-                  login('provider1', 'provider1');
+                onClick={async () => {
+                  await login('provider1', 'provider1');
                   navigate('/provider');
                 }}
               >
@@ -150,8 +150,8 @@ const Login: React.FC = () => {
                 color="primary"
                 fullWidth
                 style={{ marginTop: '1rem' }}
-                onClick={() => {
-                  login('client1', 'client1');
+                onClick={async () => {
+                  await login('client1', 'client1');
                   navigate('/provider');
                 }}
               >
