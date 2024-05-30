@@ -2,74 +2,45 @@ import { Dayjs } from 'dayjs';
 
 export type TReservationStatus =
   | 'available'
-  | 'pending'
-  | 'confirmed'
+  | 'reserved'
+  | 'booked'
+  | 'disabled'
   | 'expired';
 
 export interface Slot {
   id?: string;
-  start: string;
-  end: string;
-  status?: 'available' | 'reserved' | 'booked';
+  start: Dayjs | string;
+  end: Dayjs | string;
+  status?: TReservationStatus;
   timezone?: string;
-  disabled?: boolean;
-  selected?: boolean;
-  reserved?: number;
-  booked?: boolean;
-}
-
-export interface Schedule {
-  date: string;
-  slots: Slot[];
-  timezone?: string;
-  timer?: number | null;
-}
-
-export interface Availability {
-  date: string;
-  start: string;
-  end: string;
-  timezone?: string;
-  timeSlots: Slot[];
-  selectedDays?: boolean[];
-}
-
-export interface Provider {
-  id: number | string;
-  name: string;
-  schedules: Schedule[];
-  availability: Availability[];
-}
-
-export interface SubmittedSchedule {
-  date: string;
-  slot: Slot;
-  timezone?: string;
-  timer?: number | null;
-}
-
-export interface TimeSlot {
-  id?: string;
-  start: Dayjs | string | null;
-  end: Dayjs | string | null;
-  timezone?: string;
-  status: 'available' | 'booked' | 'reserved';
-  // Providers id available at this time slot.
-  availableProviders: string[];
-}
-
-export interface DateRange {
-  start: Dayjs | null;
-  end: Dayjs | null;
+  /**
+   * List of available providers for the slot with status 'available'.
+   */
+  availableProviders?: string[];
 }
 
 export interface Reservation {
-  id: number;
-  clientId: number;
+  id: string;
+  clientId: string;
   providerId: string | number;
   date: string;
-  slot: Slot;
+  // @todo merge to 1 param
+  slot?: Slot;
   timer?: number | null;
   status: TReservationStatus;
-  expirationTime: string;
+  expirationTime?: Dayjs | string;
+}
+
+export interface Provider {
+  // id: number | string;
+  id: string;
+  name: string;
+  schedules: Reservation[];
+  availability: Reservation[];
+}
+
+export interface User {
+  id: string;
+  name: string;
+  role: string;
 }
