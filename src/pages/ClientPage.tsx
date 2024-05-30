@@ -1,33 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Grid } from '@mui/material';
-import { Reservation, Schedule } from '../types/index.ts';
+import { Reservation, Schedule } from '../types';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DATE_TIME_FORMAT, DEFAULT_TIMER, ReservationStatus } from '../consts';
 import { Provider, Slot } from '../types';
-import SelectTimeSlots from '../components/Client/SelectTimeSlots.tsx';
-import { useAuth } from '../components/Auth/context/AuthContext.tsx';
+import SelectTimeSlots from '../components/Client/SelectTimeSlots';
+import { useAuth } from '../components/Auth/context/AuthContext';
 import {
   ALL_PROVIDERS,
   useProvider,
-} from '../components/Client/context/ProviderContext.tsx';
-import { SelectProvidersSection } from '../components/Client/SelectProvidersSection.tsx';
-import { ReservationSubmit } from '../components/Reservations/ReservationSubmit.tsx';
-import { generateClientTimeSlotsForDay } from '../utils/generateTimeSlots.tsx';
-import PageLayout from '../components/ui/PageLayout.tsx';
+} from '../components/Client/context/ProviderContext';
+import { SelectProvidersSection } from '../components/Client/SelectProvidersSection';
+import { ReservationSubmit } from '../components/Reservations/ReservationSubmit';
+import { generateClientTimeSlotsForDay } from '../utils/generateTimeSlots';
+import PageLayout from '../components/ui/PageLayout';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { SelectProvider } from '../components/Client/SelectProvider.tsx';
-import { CommonCalendar } from '../components/Calendar/CommonCalendar.tsx';
-import { useDay } from '../components/Calendar/context/DayContext.tsx';
+import { SelectProvider } from '../components/Client/SelectProvider';
+import { CommonCalendar } from '../components/Calendar/CommonCalendar';
+import { useDay } from '../components/Calendar/context/DayContext';
 import {
   createReservation,
   fetchReservations,
-} from '../utils/reservationService.tsx';
+} from '../utils/reservationService';
 import { fetchProviders } from '../utils/providersService.ts';
-import Reservations from '../components/Reservations/Reservation.tsx';
-import { useReservations } from '../components/Reservations/context/ReservationContext.tsx';
+import Reservations from '../components/Reservations/Reservation';
+import { useReservations } from '../components/Reservations/context/ReservationContext';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -170,17 +170,16 @@ const ClientPage: React.FC = () => {
             md: 2,
           }}
         >
-          <Grid
+          <Box
             flex={1}
-            direction="column"
-            sx={{ gap: '10px', display: 'flex' }}
+            sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
           >
             <SelectProvider providers={providers} />
             <CommonCalendar
               schedules={schedules}
               minDate={dayjs().startOf('day')}
             />
-          </Grid>
+          </Box>
           <Grid item xs={12} md={8}>
             <SelectTimeSlots
               availableSlots={availableClientSlots}
