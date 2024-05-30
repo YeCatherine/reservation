@@ -9,7 +9,7 @@ test.describe('DateTimeRangePicker', () => {
     await page.getByRole('gridcell', { name: '21' }).click();
     await page.getByRole('button', { name: '08:30 - 08:45' }).click();
     await page.getByRole('button', { name: 'provider1' }).click();
-    // Timr left to confirm.
+    // Timer left to confirm.
     await page.getByText('Time left to confirm: 29:').click();
     await page.getByText('Reserved time: 08:30 - 08:45').isVisible();
     await page.getByRole('button', { name: 'Delete' }).first().click();

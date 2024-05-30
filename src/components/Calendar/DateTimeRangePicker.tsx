@@ -24,7 +24,6 @@ type TButtonState = 'create' | 'update';
  *
  * A component to select and manage date and time ranges.
  *
- * @param {function} setTimeSlots - Function to set time slots
  * @returns {JSX.Element} The rendered component
  */
 const DateTimeRangePicker: React.FC = (): JSX.Element => {
@@ -100,7 +99,6 @@ const DateTimeRangePicker: React.FC = (): JSX.Element => {
 
   const preparedTimeSlotStart = timeSlot?.start || null;
   const preparedTimeSlotEnd = timeSlot?.end || null;
-  // const creteUpdateFlat = (timeSlot === null)? "create" : "update";
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Grid container spacing={2}>

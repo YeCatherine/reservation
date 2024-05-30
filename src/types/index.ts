@@ -11,6 +11,7 @@ export interface Slot {
   id?: string;
   start: Dayjs | string;
   end: Dayjs | string;
+  date: Dayjs | string;  // Ensure date property is included
   status?: TReservationStatus;
   timezone?: string;
   /**

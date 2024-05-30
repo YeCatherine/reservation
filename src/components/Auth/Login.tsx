@@ -38,6 +38,7 @@ const Login: React.FC = () => {
         }
       }
     } catch (error) {
+      //tslint:disable-next-line
       if (error.response && error.response.status === 401) {
         alert('Invalid username or password');
       } else {

@@ -3,13 +3,11 @@ import CardContent from '@mui/material/CardContent';
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { useProvider } from './context/ProviderContext';
 import { ALL_PROVIDERS } from '../../consts';
-import DebugPanel from '../ui/DebugPanel.tsx';
 /**
  * SelectProvider component
  *
  * A component for selecting the current provider from a list.
  *
- * @param {Array} providers - Array of provider objects
  * @returns {JSX.Element} The rendered component
  */
 export function SelectProvider() {

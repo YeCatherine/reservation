@@ -34,20 +34,6 @@ export function CommonCalendar({
     setExpanded(!expanded);
   };
 
-  // Collapse calendar on mobile.
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     if (window.innerWidth <= 600) {
-  //       setExpanded(false);
-  //     } else {
-  //       setExpanded(true);
-  //     }
-  //   };
-  //   window.addEventListener('resize', handleResize);
-  //   handleResize();
-  //   return () => window.removeEventListener('resize', handleResize);
-  // }, []);
-
   return (
     <Card>
       <CardHeader title="Select Date and Time" action={<TimeZoneSelector />} />

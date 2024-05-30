@@ -18,8 +18,8 @@ dayjs.extend(isSameOrBefore);
  * A component to select and navigate between dates.
  *
  * @param {boolean} expanded - Determines if the component is expanded
- * @param {function} handleToggleExpand - Function to toggle expansion
- * @param {dayjs.Dayjs | null} minDate - The minimum selectable / allowed date (for clients to allow select only future dates)
+ * @param {() => void} handleToggleExpand - Function to toggle the component's expanded state
+ * @param {dayjs.Dayjs | null} minDate - The minimum date allowed to be selected
  */
 const DateSelector: React.FC<{
   expanded: boolean;
