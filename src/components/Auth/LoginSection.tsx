@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from './context/AuthContext';
 import { Box, Button, Divider, Typography } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
@@ -9,7 +9,7 @@ import { Link, useLocation } from 'react-router-dom';
  * This component displays the login/logout section based on the user's authentication state.
  */
 const LoginSection: React.FC = () => {
-  const { user, login, logout } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
 
   return (
