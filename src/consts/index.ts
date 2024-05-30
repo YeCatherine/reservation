@@ -1,7 +1,10 @@
-export const DATE_TIME_FORMAT = 'YYYY-MM-DD';
+export const DATE_FORMAT = 'YYYY-MM-DD';
+export const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm';
+export const DATE_TIME_FORMAT_LONG = 'dddd, Do of MMMM';
+export const TIME_FORMAT = 'HH:mm';
 export const DEFAULT_TIMEZONE = 'PST';
 
-export const ALL_PROVIDERS = 'all';
+export const ALL_PROVIDERS = 'all_providers';
 
 export const DEFAULT_TIMER = 30;
 
@@ -11,13 +14,16 @@ export enum Role {
 }
 
 /**
- * Enum for slot states.
+ * Enum for Reservation states.
  */
-export enum SlotState {
-  Disabled = 'disabled',
-  Booked = 'booked',
-  Reserved = 'reserved',
-  Available = 'available',
+export enum ReservationStatus {
+  AVAILABLE = 'available',
+  RESERVED = 'reserved',
+  BOOKED = 'booked',
+  DISABLED = 'disabled',
+  // To cover 30 minutes delay.
+  EXPIRED = 'expired',
+  SELECTED = 'selected',
 }
 
 /**
@@ -29,10 +35,3 @@ export const TOOLTIP_TEXTS = {
   BOOKED: 'This slot is already booked',
   AVAILABLE: 'Click to book',
 };
-
-export enum ReservationStatus {
-  AVAILABLE = 'available',
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  EXPIRED = 'expired',
-}
