@@ -39,13 +39,12 @@ const DateSelector: React.FC<{
   }, [selectedDate, minDate]);
 
   const handlePreviousDay = () => {
-    setSelectedDate((prevDate) => prevDate.subtract(1, 'day'));
+    setSelectedDate(selectedDate.subtract(1, 'day'));
   };
 
   const handleNextDay = () => {
-    setSelectedDate((prevDate) => prevDate.add(1, 'day'));
+    setSelectedDate(selectedDate.add(1, 'day'));
   };
-
   if (!selectedDate) {
     return null;
   }

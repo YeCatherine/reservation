@@ -1,4 +1,3 @@
-import React from 'react';
 import { FormControl, MenuItem, Select } from '@mui/material';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';

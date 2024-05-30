@@ -3,16 +3,22 @@ import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
 import { Button, Grid, TextField } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
-import { DATE_TIME_FORMAT } from '../../consts';
+import { DATE_FORMAT, TIME_FORMAT } from '../../consts';
 import { useAuth } from '../Auth/context/AuthContext.tsx';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { updateProvidersAvailability } from '../../utils/providersService.ts';
-import { TimeSlot } from '../../types';
+import { Slot } from '../../types';
 import { useProvider } from '../Client/context/ProviderContext.tsx';
 import { useDay } from './context/DayContext.tsx';
 
 dayjs.extend(isSameOrBefore);
 
+enum ButtonState {
+  create = 'create',
+  update = 'update',
+}
+
+type TButtonState = 'create' | 'update';
 /**
  * DateTimeRangePicker component
  *
@@ -24,9 +30,19 @@ dayjs.extend(isSameOrBefore);
 const DateTimeRangePicker: React.FC = (): JSX.Element => {
   const { selectedDate, selectedTimezone } = useDay();
   const { setAvailableSlots, currentDaySlots } = useProvider();
-  const [timeSlot, setTimeSlot] = useState<TimeSlot | null>(currentDaySlots);
+  const [timeSlot, setTimeSlot] = useState<Slot | null>(currentDaySlots);
 
+  const [creteUpdateFlag, setCreteUpdateFlag] = useState<TButtonState>(
+    ButtonState.create
+  );
+  // console.log("creteUpdateFlag", {currentDaySlots, creteUpdateFlag})
+  //
   useEffect(() => {
+    if (currentDaySlots) {
+      setCreteUpdateFlag(ButtonState.update);
+    } else {
+      setCreteUpdateFlag(ButtonState.create);
+    }
     if (currentDaySlots) {
       setTimeSlot(currentDaySlots);
     } else {
@@ -64,13 +80,16 @@ const DateTimeRangePicker: React.FC = (): JSX.Element => {
    * Handle form submission.
    */
   const handleSubmit = async () => {
+    setCreteUpdateFlag(ButtonState.update);
+
     const availability = {
-      date: selectedDate.format(DATE_TIME_FORMAT),
+      date: selectedDate.format(DATE_FORMAT),
       timezone: selectedTimezone,
-      start: timeSlot?.start ? timeSlot.start.format('HH:mm') : null,
-      end: timeSlot?.end ? timeSlot.end.format('HH:mm') : null,
+      start: timeSlot?.start ? timeSlot.start.format(TIME_FORMAT) : null,
+      end: timeSlot?.end ? timeSlot.end.format(TIME_FORMAT) : null,
     };
 
+    if (!user) return;
     const providerId = user.id;
     const response = await updateProvidersAvailability(
       providerId,
@@ -81,7 +100,7 @@ const DateTimeRangePicker: React.FC = (): JSX.Element => {
 
   const preparedTimeSlotStart = timeSlot?.start || null;
   const preparedTimeSlotEnd = timeSlot?.end || null;
-
+  // const creteUpdateFlat = (timeSlot === null)? "create" : "update";
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Grid container spacing={2}>
@@ -169,7 +188,7 @@ const DateTimeRangePicker: React.FC = (): JSX.Element => {
               fullWidth
               data-testid="submit-event-button"
             >
-              Submit
+              {creteUpdateFlag === ButtonState.create ? 'Create' : 'Update'}
             </Button>
           )}
         </Grid>
