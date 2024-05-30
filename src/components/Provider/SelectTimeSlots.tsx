@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';

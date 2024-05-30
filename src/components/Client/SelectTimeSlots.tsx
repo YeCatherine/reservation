@@ -12,12 +12,12 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import { useDay } from '../Calendar/context/DayContext';
+import { Slot } from '../../types';
 import { ReservationStatus } from '../../consts';
-import { useReservations } from '../Reservations/context/ReservationContext.tsx';
+import CircularProgress from '@mui/material/CircularProgress';
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
-
-const guessTZ = dayjs.tz.guess();
 
 /**
  * SelectTimeSlots component
@@ -32,75 +32,110 @@ const guessTZ = dayjs.tz.guess();
  * @returns {JSX.Element | string | null} The rendered component, "no available slots" message, or null if no date is selected
  */
 const SelectTimeSlots: React.FC<{
-  availableSlots: any[];
-  selectedSlot: any;
-  handleSlotClick: (slot: any) => void;
-  todaysBookedSlots: any[];
-}> = ({ availableSlots, selectedSlot, handleSlotClick, todaysBookedSlots }) => {
+  availableSlots: Slot[];
+  selectedSlot: Slot;
+  handleSlotClick: (slot: Slot) => void;
+}> = ({ availableSlots, selectedSlot, handleSlotClick }) => {
   const { selectedDate } = useDay();
 
   if (!selectedDate) {
     return null;
   }
 
-  if (!availableSlots || availableSlots.length === 0) {
-    return 'No available slots';
+  // Handle loading state
+  if (availableSlots === null) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
-  /**
-   * Get the status of a slot.
-   * @param {Object} slot - The time slot object.
-   * @returns {Object} The status and tooltip text for the slot.
-   */
-  const getSlotStatus = (slot) => {
-    const { reservations } = useReservations();
-    const bookedSlot = todaysBookedSlots?.find(
-      (booked) =>
-        booked.slot.start === slot.start && booked.slot.end === slot.end
+  if (availableSlots.length === 0) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        No available slots
+      </Box>
     );
-    const currentTime = dayjs().tz(guessTZ);
-    const next24Hours = currentTime.add(24, 'hours');
-
-    const slotStart = dayjs.tz(
-      `${selectedDate.format('YYYY-MM-DD')} ${slot.start}`,
-      'YYYY-MM-DD HH:mm',
-      guessTZ
-    );
-    const disabled = slotStart.isBefore(next24Hours);
-
-    if (disabled) {
-      return { isDisabled: true, tooltipText: 'Please book in 24 hours ahead' };
-    }
-
-    if (bookedSlot) {
-      switch (bookedSlot.status) {
-        case ReservationStatus.CONFIRMED:
-          return { isBooked: true, tooltipText: 'Booked' };
-        case ReservationStatus.PENDING:
-          return { isReserved: true, tooltipText: 'Reserved' };
-        default:
-          return {};
-      }
-    }
-
-    if (
-      reservations?.find(
-        (reserved) =>
-          reserved.slot.start === slot.start && reserved.slot.end === slot.end
-      )
-    ) {
-      return { isReserved: true, tooltipText: 'Reserved' };
-    }
-    return {};
-  };
+  }
 
   /**
    * Check if a slot is selected.
    * @param {Object} slot - The time slot object.
    * @returns {boolean} Whether the slot is selected.
    */
-  const isSlotSelected = (slot: any) =>
+  const isSlotSelected = (slot: Slot) =>
     selectedSlot?.start === slot.start && selectedSlot?.end === slot.end;
+  /**
+   * Prepare the time slots for rendering.
+   */
+  const prepareSlots = availableSlots.map((slot, index) => {
+    const isSelected = isSlotSelected(slot);
+    if (isSelected) {
+      slot.status = ReservationStatus.SELECTED;
+    }
+
+    const ButtonText = `${slot.start} - ${slot.end}`;
+    const ButtonVariant =
+      slot.status === ReservationStatus.SELECTED
+        ? 'contained'
+        : slot.status === ReservationStatus.RESERVED ||
+            slot.status === ReservationStatus.BOOKED
+          ? 'text'
+          : 'outlined';
+    const ButtonDisabled =
+      slot.status === ReservationStatus.DISABLED ||
+      slot.status === ReservationStatus.BOOKED ||
+      slot.status === ReservationStatus.RESERVED;
+    return (
+      <Grid item xs={6} sm={4} md={2.4} key={index}>
+        <Tooltip title={slot.tooltipText || ''}>
+          <Box>
+            <Button
+              variant={ButtonVariant}
+              onClick={() => handleSlotClick(slot)}
+              disabled={ButtonDisabled}
+              size={'small'}
+              sx={{
+                margin: 0.5,
+                padding: '2px 4px',
+                minWidth: '60px',
+                cursor: ButtonDisabled ? 'not-allowed' : 'pointer',
+                textDecoration:
+                  slot.status === ReservationStatus.BOOKED
+                    ? 'line-through'
+                    : 'none',
+                backgroundColor:
+                  slot.status === ReservationStatus.SELECTED
+                    ? 'primary.light'
+                    : slot.status === ReservationStatus.RESERVED
+                      ? 'yellow.200'
+                      : 'inherit',
+                borderColor:
+                  slot.status === ReservationStatus.SELECTED
+                    ? 'primary.main'
+                    : 'grey.300',
+              }}
+            >
+              {ButtonText} {isSelected ? '✔' : ''}
+            </Button>
+          </Box>
+        </Tooltip>
+      </Grid>
+    );
+  });
 
   return (
     <Card sx={{ padding: 2 }}>
@@ -115,47 +150,7 @@ const SelectTimeSlots: React.FC<{
         sx={{ pr: 1, pl: 1, pt: 0, m: 0, '&:last-child': { paddingBottom: 0 } }}
       >
         <Grid container spacing={0.5}>
-          {availableSlots.map((slot, index) => {
-            const { isDisabled, isBooked, isReserved, tooltipText } =
-              getSlotStatus(slot);
-            const isSelected = isSlotSelected(slot);
-
-            return (
-              <Grid item xs={6} sm={4} md={2.4} key={index}>
-                <Tooltip title={tooltipText || ''}>
-                  <Box>
-                    <Button
-                      variant={
-                        isBooked ? 'text' : isReserved ? null : 'outlined'
-                      }
-                      onClick={() => handleSlotClick(slot)}
-                      disabled={isDisabled || isBooked || isReserved}
-                      size={'small'}
-                      sx={{
-                        margin: 0.5,
-
-                        padding: '2px 4px',
-                        minWidth: '60px',
-                        cursor:
-                          isDisabled || isBooked || isReserved
-                            ? 'not-allowed'
-                            : 'pointer',
-                        textDecoration: isBooked ? 'line-through' : 'none',
-                        backgroundColor: isSelected
-                          ? 'primary.light'
-                          : isReserved
-                            ? 'yellow.200'
-                            : 'inherit',
-                        borderColor: isSelected ? 'primary.main' : 'grey.300',
-                      }}
-                    >
-                      {slot.start} - {slot.end}
-                    </Button>
-                  </Box>
-                </Tooltip>
-              </Grid>
-            );
-          })}
+          {prepareSlots}
         </Grid>
       </CardContent>
     </Card>

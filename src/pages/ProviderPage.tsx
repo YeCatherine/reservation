@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Grid } from '@mui/material';
 import axios from 'axios';
-import { Schedule, Slot } from '../types';
-import { DATE_TIME_FORMAT, Role } from '../consts';
+import { Reservation, Slot } from '../types';
+import { DATE_FORMAT, Role } from '../consts';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
@@ -23,10 +23,10 @@ dayjs.extend(timezone);
  * Fetch schedules from the API.
  * @param {function} setSchedules - Function to set schedules state.
  */
-const fetchSchedules = async (setSchedules) => {
+const fetchSchedules = async () => {
   try {
     const response = await axios.get('/api/schedules');
-    setSchedules(response.data);
+    return response.data;
   } catch (error) {
     console.error('Error fetching schedules:', error);
   }
@@ -37,20 +37,24 @@ const ProviderPage: React.FC = () => {
 
   const { selectedDate } = useDay();
 
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [schedules, setSchedules] = useState<Reservation[]>([]);
 
   useEffect(() => {
-    fetchSchedules(setSchedules);
+    (async () => {
+      const data = await fetchSchedules();
+      setSchedules(data);
+    })();
   }, []);
 
-  const [_, setSelectedDateSlots] = useState<Slot[]>([]);
+  const [, setSelectedDateSlots] = useState<Slot[]>([]);
 
   useEffect(() => {
     if (selectedDate) {
       const schedule = schedules.find(
-        (s) => s.date === selectedDate.format(DATE_TIME_FORMAT)
+        (s) => s.date === selectedDate.format(DATE_FORMAT)
       );
-      setSelectedDateSlots(schedule ? schedule.slots : []);
+
+      setSelectedDateSlots(schedule && schedule.slots ? schedule.slots : []);
     }
   }, [selectedDate, schedules]);
 
