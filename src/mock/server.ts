@@ -1,19 +1,14 @@
 import { createServer, Model, Response } from 'miragejs';
 import { nanoid } from 'nanoid';
 import dayjs from 'dayjs';
+import { Provider, Reservation, Slot, User } from '../types';
 import {
-  Provider,
-  Reservation,
-  Schedule,
-  Slot,
-  SubmittedSchedule,
-} from '../types';
-import {
-  DATE_TIME_FORMAT,
+  ALL_PROVIDERS,
+  DATE_FORMAT,
   DEFAULT_TIMEZONE,
   ReservationStatus,
 } from '../consts';
-
+// @ts-nocheck
 /**
  * Mirage js sever to emulate server on dev mode.
  */
@@ -23,9 +18,9 @@ export function makeServer({ environment = 'development' } = {}) {
 
     models: {
       provider: Model.extend<Partial<Provider>>({}),
-      user: Model,
+      user: Model.extend<Partial<User>>({}),
       reservation: Model.extend<Partial<Reservation>>({}),
-      schedule: Model.extend<Partial<Schedule>>({}),
+      schedule: Model.extend<Partial<Reservation>>({}),
       slot: Model.extend<Partial<Slot>>({}),
     },
 
@@ -36,18 +31,21 @@ export function makeServer({ environment = 'development' } = {}) {
         password: 'client1',
         role: 'client',
       });
+
       server.create('user', {
         id: nanoid(),
         name: 'client2',
         password: 'client2',
         role: 'client',
       });
+
       server.create('user', {
         id: 'provider1',
         name: 'provider1',
         password: 'provider1',
         role: 'provider',
       });
+
       server.create('user', {
         id: 'provider2',
         name: 'provider2',
@@ -59,116 +57,75 @@ export function makeServer({ environment = 'development' } = {}) {
         id: nanoid(),
         clientId: 'client1',
         providerId: 'provider1',
-        date: dayjs().add(1, 'day').format(DATE_TIME_FORMAT),
+        date: dayjs().add(2, 'day').format(DATE_FORMAT),
         slot: {
           start: '08:15',
           end: '08:30',
         },
-        status: ReservationStatus.CONFIRMED,
+        status: ReservationStatus.BOOKED,
       });
+
       server.create('reservation', {
         id: nanoid(),
         clientId: 'client2',
         providerId: 'provider1',
-        date: dayjs().add(1, 'day').format(DATE_TIME_FORMAT),
+        date: dayjs().add(3, 'day').format(DATE_FORMAT),
         slot: {
           start: '09:30',
           end: '09:45',
         },
-        status: ReservationStatus.PENDING,
+        status: ReservationStatus.RESERVED,
       });
       server.create('reservation', {
         id: nanoid(),
         clientId: 'client2',
         providerId: 'provider1',
-        date: dayjs().add(1, 'day').format(DATE_TIME_FORMAT),
+        date: dayjs().add(3, 'day').format(DATE_FORMAT),
+        slot: {
+          start: '14:30',
+          end: '14:45',
+        },
+        status: ReservationStatus.RESERVED,
+      });
+      server.create('reservation', {
+        id: nanoid(),
+        clientId: 'client2',
+        providerId: 'provider1',
+        date: dayjs().add(2, 'day').format(DATE_FORMAT),
         slot: {
           start: '10:30',
           end: '10:45',
         },
-        status: ReservationStatus.PENDING,
+        status: ReservationStatus.RESERVED,
       });
+
       server.create('provider', {
         id: 'provider1',
         name: 'Provider A',
         availability: [
           {
-            date: dayjs().format(DATE_TIME_FORMAT),
+            date: dayjs().format(DATE_FORMAT),
             timezone: 'PST',
             start: '08:00',
             end: '15:00',
           },
           {
-            date: dayjs().add(1, 'day').format(DATE_TIME_FORMAT),
+            date: dayjs().add(1, 'day').format(DATE_FORMAT),
             timezone: 'PST',
             start: '08:00',
             end: '15:00',
           },
           {
-            date: dayjs().add(2, 'day').format(DATE_TIME_FORMAT),
+            date: dayjs().add(2, 'day').format(DATE_FORMAT),
             timezone: 'PST',
             start: '08:00',
             end: '15:00',
           },
           {
-            date: dayjs().add(10, 'day').format(DATE_TIME_FORMAT),
+            date: dayjs().add(10, 'day').format(DATE_FORMAT),
             timezone: 'PST',
             start: '08:00',
             end: '15:00',
-          },
-        ],
-        schedules: [
-          {
-            date: dayjs().add(-3, 'day').format(DATE_TIME_FORMAT),
-            timezone: 'PST',
-            slots: [
-              {
-                start: '08:00',
-                end: '08:15',
-              },
-              { start: '09:00', end: '09:15' },
-              { start: '11:00', end: '11:15', booked: true },
-            ],
-          },
-          {
-            date: dayjs().add(-2, 'day').format(DATE_TIME_FORMAT),
-            timezone: 'PST',
-            slots: [
-              {
-                start: '08:00',
-                end: '08:15',
-              },
-              { start: '09:00', end: '09:15' },
-              { start: '11:00', end: '11:15', booked: true },
-            ],
-          },
-          {
-            date: dayjs().add(1, 'day').format(DATE_TIME_FORMAT),
-            timezone: 'PST',
-            slots: [
-              {
-                start: '08:00',
-                end: '08:15',
-              },
-              { start: '09:00', end: '09:15' },
-              { start: '11:00', end: '11:15', booked: true },
-            ],
-          },
-          {
-            date: dayjs().add(3, 'day').format(DATE_TIME_FORMAT),
-            timezone: 'PST',
-            slots: [
-              {
-                start: '08:00',
-                end: '08:15',
-                reserved: dayjs()
-                  .add(-2, 'minutes')
-                  .tz(DEFAULT_TIMEZONE)
-                  .unix(),
-              },
-              { start: '09:00', end: '09:15' },
-              { start: '11:00', end: '11:15', booked: true },
-            ],
           },
         ],
       });
@@ -178,88 +135,34 @@ export function makeServer({ environment = 'development' } = {}) {
         name: 'Provider B',
         availability: [
           {
-            date: dayjs().format(DATE_TIME_FORMAT),
+            date: dayjs().format(DATE_FORMAT),
             timezone: 'PST',
             start: '09:00',
             end: '15:00',
           },
           {
-            date: dayjs().add(1, 'day').format(DATE_TIME_FORMAT),
+            date: dayjs().add(1, 'day').format(DATE_FORMAT),
             timezone: 'PST',
             start: '08:00',
             end: '15:00',
           },
           {
-            date: dayjs().add(2, 'day').format(DATE_TIME_FORMAT),
+            date: dayjs().add(2, 'day').format(DATE_FORMAT),
             timezone: 'PST',
             start: '10:00',
             end: '15:00',
           },
           {
-            date: dayjs().add(3, 'day').format(DATE_TIME_FORMAT),
+            date: dayjs().add(3, 'day').format(DATE_FORMAT),
             timezone: 'PST',
             start: '08:00',
             end: '14:00',
           },
           {
-            date: dayjs().add(4, 'day').format(DATE_TIME_FORMAT),
+            date: dayjs().add(15, 'day').format(DATE_FORMAT),
             timezone: 'PST',
             start: '08:00',
             end: '15:00',
-          },
-        ],
-        schedules: [
-          {
-            date: dayjs().add(-3, 'day').format(DATE_TIME_FORMAT),
-            timezone: 'PST',
-            slots: [
-              {
-                start: '08:00',
-                end: '08:15',
-              },
-              { start: '09:00', end: '09:15' },
-              { start: '11:00', end: '11:15', booked: true },
-            ],
-          },
-          {
-            date: dayjs().add(-2, 'day').format(DATE_TIME_FORMAT),
-            timezone: 'PST',
-            slots: [
-              {
-                start: '08:00',
-                end: '08:15',
-              },
-              { start: '09:00', end: '09:15' },
-              { start: '11:00', end: '11:15', booked: true },
-            ],
-          },
-          {
-            date: dayjs().add(1, 'day').format(DATE_TIME_FORMAT),
-            timezone: 'PST',
-            slots: [
-              {
-                start: '08:00',
-                end: '08:15',
-              },
-              { start: '09:00', end: '09:15' },
-              { start: '11:00', end: '11:15', booked: true },
-            ],
-          },
-          {
-            date: dayjs().add(3, 'day').format(DATE_TIME_FORMAT),
-            timezone: 'PST',
-            slots: [
-              {
-                start: '08:00',
-                end: '08:15',
-                reserved: dayjs()
-                  .add(-2, 'minutes')
-                  .tz(DEFAULT_TIMEZONE)
-                  .unix(),
-              },
-              { start: '09:00', end: '09:15' },
-              { start: '11:00', end: '11:15', booked: true },
-            ],
           },
         ],
       });
@@ -267,7 +170,7 @@ export function makeServer({ environment = 'development' } = {}) {
 
     routes() {
       this.namespace = 'api';
-      const providerAvailability = {};
+      const providerAvailability: Record<string, Reservation[]> = {};
       this.get('/providers', (schema) => {
         return schema.providers.all().models;
       });
@@ -279,8 +182,9 @@ export function makeServer({ environment = 'development' } = {}) {
 
       this.get('/providers/:id/availability', (schema, request) => {
         const id = request.params.id;
-        if (id === 'any') {
-          const providers = schema.providers.all().models;
+
+        if (id === ALL_PROVIDERS) {
+          const providers = schema.providers.all().models as Provider[];
           providers.forEach((provider) => {
             if (!providerAvailability[provider.id]) {
               providerAvailability[provider.id] = provider.availability;
@@ -295,7 +199,7 @@ export function makeServer({ environment = 'development' } = {}) {
             return providerAvailability[provider.id];
           }
           providerAvailability[provider.id] = provider.availability;
-          return provider.availability;
+          return { id: provider.availability };
         } else {
           return new Response(
             404,
@@ -382,7 +286,7 @@ export function makeServer({ environment = 'development' } = {}) {
       });
 
       this.post('/schedules', (schema, request) => {
-        const attrs: SubmittedSchedule[] = JSON.parse(request.requestBody);
+        const attrs: Reservation[] = JSON.parse(request.requestBody);
 
         // Clear existing schedules before creating new ones
         schema.schedules.all().destroy();
