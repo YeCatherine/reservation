@@ -8,8 +8,8 @@ interface ModalContextProps {
   modalState: ModalState;
   openModal: (id: string) => void;
   closeModal: (id: string) => void;
-  setModalData: (id: string, data: any) => void;
-  getModalData: (id: string) => any;
+  setModalData: (id: string, data: ModalState) => void;
+  getModalData: (id: string) => void;
 }
 
 const ModalContext = createContext<ModalContextProps | undefined>(undefined);
@@ -22,7 +22,9 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [modalState, setModalState] = useState<ModalState>({});
-  const [modalData, setModalDataState] = useState<{ [key: string]: any }>({});
+  const [modalData, setModalDataState] = useState<{
+    [key: string]: ModalState;
+  }>({});
 
   const openModal = (id: string) => {
     setModalState((prevState) => ({ ...prevState, [id]: true }));
@@ -32,7 +34,7 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({
     setModalState((prevState) => ({ ...prevState, [id]: false }));
   };
 
-  const setModalData = (id: string, data: any) => {
+  const setModalData = (id: string, data: ModalState) => {
     setModalDataState((prevState) => ({ ...prevState, [id]: data }));
   };
 
@@ -49,6 +51,7 @@ export const ModalProvider: React.FC<{ children: ReactNode }> = ({
   );
 };
 
+// eslint-disable-next-line
 export const useModal = () => {
   const context = useContext(ModalContext);
   if (context === undefined) {

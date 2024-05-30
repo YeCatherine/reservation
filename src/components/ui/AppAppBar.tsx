@@ -10,8 +10,8 @@ import Typography from '@mui/material/Typography';
 import MenuItem from '@mui/material/MenuItem';
 import Drawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
-import ToggleColorMode from './components/ToggleColorMode.tsx';
-import LoginSection from '../Auth/LoginSection.tsx';
+import ToggleColorMode from './components/ToggleColorMode';
+import LoginSection from '../Auth/LoginSection';
 import { Link } from 'react-router-dom';
 
 interface AppAppBarProps {
@@ -83,8 +83,8 @@ function AppAppBar({ mode, toggleColorMode }: AppAppBarProps) {
                 {projectName}
               </Typography>
               <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                {links.map((link, index) => (
-                  <MenuItem sx={{ py: '6px', px: '12px' }}>
+                {links.map((link) => (
+                  <MenuItem key={link.href} sx={{ py: '6px', px: '12px' }}>
                     <Typography
                       variant="body2"
                       color="text.primary"
@@ -139,8 +139,8 @@ function AppAppBar({ mode, toggleColorMode }: AppAppBarProps) {
                       toggleColorMode={toggleColorMode}
                     />
                   </Box>
-                  {links.map((link, index) => (
-                    <MenuItem>
+                  {links.map((link) => (
+                    <MenuItem key={link.href}>
                       <Typography
                         variant="body2"
                         color="text.primary"

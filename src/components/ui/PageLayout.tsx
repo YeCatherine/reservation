@@ -6,19 +6,19 @@ interface PageLayoutProps {
   children: React.ReactNode;
 }
 
-const PageLayout: React.FC<PageLayoutProps> = ({ title, children }) => {
+const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
   return (
     <Box
       sx={{
         paddingTop: 3,
         paddingBottom: 3,
         paddingLeft: {
-          xs: 1, // 3 for mobile
-          md: 14, // 14 for desktop
+          xs: 1,
+          md: 14,
         },
         paddingRight: {
-          xs: 1, // 3 for mobile
-          md: 14, // 14 for desktop
+          xs: 1,
+          md: 14,
         },
       }}
     >
@@ -31,9 +31,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({ title, children }) => {
           },
         }}
       >
-        {/*<Typography variant="h4" align="center" gutterBottom>*/}
-        {/*  {title}*/}
-        {/*</Typography>*/}
         {children}
       </Paper>
     </Box>

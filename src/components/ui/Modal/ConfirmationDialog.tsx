@@ -6,19 +6,16 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
-import React from 'react';
 import { useModal } from './context/ModalProvider.tsx';
 import { Check as CheckIcon, Close as CloseIcon } from '@mui/icons-material';
 
 /**
- * Confirmation dialog.
+ * Confirmation dialog component.
  *
  * @param modalId
  * @param modalTitle
  * @param modalText
  * @param onConfirm
- * @param onCancel
- * @constructor
  */
 export function ConfirmationDialog({
   modalId = 'confirmationDialog',
@@ -32,18 +29,16 @@ export function ConfirmationDialog({
   onConfirm: () => void;
 }) {
   const { modalState, closeModal } = useModal();
-  const onCancel = () => {
-    // setOpenConfirmDialog(false);
-    closeModal(modalId);
-  };
+  const onCancel = () => closeModal(modalId);
+
   return (
     <Dialog
       open={modalState[modalId] || false}
-      onClose={() => closeModal(modalId)}
+      onClose={onCancel}
       aria-labelledby="dialog-title"
       aria-describedby="dialog-description"
     >
-      <DialogTitle id="confirm-dialog-title">{modalTitle}</DialogTitle>
+      <DialogTitle id="dialog-title">{modalTitle}</DialogTitle>
       <DialogContent>
         <DialogContentText id="dialog-description">
           {modalText}
