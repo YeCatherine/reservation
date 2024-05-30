@@ -1,126 +1,20 @@
-import { Availability, Provider, Schedule, Slot, TimeSlot } from '../types';
-import dayjs, { Dayjs } from 'dayjs';
-import { DATE_TIME_FORMAT, SlotState, TOOLTIP_TEXTS } from '../consts';
+import { Provider, Reservation, Slot } from '../types';
+import dayjs from 'dayjs';
+import {
+  DATE_FORMAT,
+  DATE_TIME_FORMAT,
+  ReservationStatus,
+  TOOLTIP_TEXTS,
+} from '../consts';
 
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import { fetchReservations } from './reservationService.tsx';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-/**
- * Generate time slots for a given timezone.
- * @param {string} selectedTimezone - The timezone in which to generate slots.
- * @param {number | Dayjs} scheduleStartTime - Start of the working day in hours (default 8 AM).
- * @param {number | Dayjs} scheduleEndTime - End of the working day in hours (default 6 PM).
- * @param {Slot[]} selectedDateSlots - Array of selected date slots to compare against.
- * @returns {Slot[]} Array of time slots.
- */
-export const generateTimeSlots = (
-  selectedTimezone: string,
-  scheduleStartTime: number | Dayjs = 8,
-  scheduleEndTime: number | Dayjs = 18,
-  selectedDateSlots: Slot[] = []
-): Slot[] => {
-  const slots: Slot[] = [];
-
-  let currentTime: Dayjs;
-  let endTime: Dayjs;
-
-  if (Number.isInteger(scheduleStartTime)) {
-    currentTime = dayjs
-      .tz()
-      .startOf('day')
-      .hour(scheduleStartTime as number)
-      .tz(selectedTimezone);
-  } else {
-    currentTime = (scheduleStartTime as Dayjs).tz(selectedTimezone);
-  }
-
-  if (Number.isInteger(scheduleEndTime)) {
-    endTime = dayjs
-      .tz()
-      .startOf('day')
-      .hour(scheduleEndTime as number)
-      .tz(selectedTimezone);
-  } else {
-    endTime = (scheduleEndTime as Dayjs).tz(selectedTimezone);
-  }
-
-  if (!currentTime.isValid() || !endTime.isValid()) {
-    throw new Error('Invalid time range');
-  }
-
-  while (currentTime.isBefore(endTime)) {
-    const endSlot = currentTime.add(15, 'minute');
-    const isSelected = selectedDateSlots.some(
-      (s) =>
-        s.start === currentTime.format('HH:mm') &&
-        s.end === endSlot.format('HH:mm')
-    );
-
-    slots.push({
-      start: currentTime.format('HH:mm'),
-      end: endSlot.format('HH:mm'),
-      disabled: false,
-      selected: isSelected,
-    });
-    currentTime = endSlot;
-  }
-  return slots;
-};
-
-/**
- * Generate client-specific time slots for a selected date and timezone.
- * @param {Dayjs} selectedDate - The date for which to generate slots.
- * @param {Schedule[]} schedules - Array of schedules.
- * @param {string} selectedTimezone - The timezone for the selected date.
- * @returns {Slot[]} Array of time slots.
- */
-export const generateClientTimeSlots = (
-  selectedDate: dayjs.Dayjs,
-  schedules: Schedule[] = [],
-  selectedTimezone: string
-): Slot[] => {
-  const selectedDateStr = selectedDate.format(DATE_TIME_FORMAT);
-  const schedule = schedules.find((s) => s.date === selectedDateStr);
-
-  if (!schedule) return [];
-
-  const currentTime = dayjs().tz(selectedTimezone);
-  const next24Hours = currentTime.add(24, 'hours');
-
-  return schedule.slots.map((slot) => {
-    const slotStart = dayjs.tz(
-      `${schedule.date} ${slot.start}`,
-      'YYYY-MM-DD HH:mm',
-      selectedTimezone
-    );
-    const disabled = slotStart.isBefore(next24Hours);
-    const state = disabled
-      ? SlotState.Disabled
-      : slot.booked
-        ? SlotState.Booked
-        : slot.reserved
-          ? SlotState.Reserved
-          : SlotState.Available;
-
-    const toolTipText = disabled
-      ? TOOLTIP_TEXTS.DISABLED
-      : slot.reserved
-        ? TOOLTIP_TEXTS.RESERVED
-        : slot.booked
-          ? TOOLTIP_TEXTS.BOOKED
-          : TOOLTIP_TEXTS.AVAILABLE;
-
-    return {
-      ...slot,
-      disabled: state !== SlotState.Available,
-      tooltip: toolTipText,
-      state: state,
-    };
-  });
-};
+const guessTZ = dayjs.tz.guess();
 
 /**
  * Generate client-specific time slots for a given day.
@@ -128,10 +22,13 @@ export const generateClientTimeSlots = (
  * @param date - The date for which to generate slots.
  * @returns Array of time slots.
  */
-export function generateClientTimeSlotsForDay(
+export async function generateClientTimeSlotsForDay(
   providers: Provider[],
-  date: string
-): TimeSlot[] {
+  date: string,
+  reservations: Reservation[]
+): Slot[] {
+  const todaysBookedSlots = await fetchReservations(date);
+
   // Helper function to add minutes to a time string
   const addMinutes = (time: string, minutes: number): string => {
     const [hours, mins] = time.split(':').map(Number);
@@ -154,28 +51,23 @@ export function generateClientTimeSlotsForDay(
   };
 
   // Find availability and schedules for the given date
-  const availabilityMap = new Map<string, Availability>();
-  const scheduleMap = new Map<string, Schedule>();
+  const availabilityMap = new Map<string, Reservation>();
 
   providers.forEach((provider) => {
     const availability = provider.availability.find((av) => av.date === date);
     if (availability) {
       availabilityMap.set(provider.id, availability);
     }
-    const schedule = provider.schedules.find((sch) => sch.date === date);
-    if (schedule) {
-      scheduleMap.set(provider.id, schedule);
-    }
   });
 
-  const result: TimeSlot[] = [];
+  const result: Slot[] = [];
   const providerIds = Array.from(availabilityMap.keys());
 
   if (providerIds.length === 0) {
     return result; // No availableProviders available on the given date
   }
 
-  const commonAvailability = availabilityMap.get(providerIds[0]);
+  const commonAvailability = availabilityMap.get(providerIds[0]) as Slot;
   if (!commonAvailability) {
     return result; // No common availability found
   }
@@ -186,7 +78,7 @@ export function generateClientTimeSlotsForDay(
   );
 
   intervals.forEach(([start, end]) => {
-    const timeSlot: TimeSlot = {
+    const timeSlot: Slot = {
       start,
       end,
       status: 'available',
@@ -197,27 +89,112 @@ export function generateClientTimeSlotsForDay(
       const availability = availabilityMap.get(providerId);
       if (!availability) return;
 
-      const schedule = scheduleMap.get(providerId);
-      const slot = schedule?.slots.find(
-        (slot) => slot.start === start && slot.end === end
-      );
-
-      if (slot?.booked) {
-        timeSlot.status = 'booked';
-      } else if (slot?.reserved) {
-        timeSlot.status = 'reserved';
-      } else {
+      if (timeSlot.availableProviders) {
         timeSlot.availableProviders.push(providerId);
+      } else {
+        timeSlot.availableProviders = [providerId];
       }
     });
+    const currentDay = dayjs(date);
+
+    const { isDisabled, isBooked, isReserved, tooltipText } = getSlotStatus(
+      timeSlot,
+      todaysBookedSlots,
+      currentDay,
+      reservations
+    );
+
+    if (isDisabled) {
+      timeSlot.status = ReservationStatus.DISABLED;
+    }
+    if (isBooked) {
+      timeSlot.status = ReservationStatus.BOOKED;
+    }
+    if (isReserved) {
+      timeSlot.status = ReservationStatus.RESERVED;
+    }
+
+    timeSlot.tooltipText = tooltipText;
 
     if (
-      timeSlot.availableProviders.length > 0 ||
-      timeSlot.status !== 'available'
+      (timeSlot.availableProviders && timeSlot.availableProviders.length > 0) ||
+      timeSlot.status !== ReservationStatus.AVAILABLE
     ) {
       result.push(timeSlot);
     }
   });
-
   return result;
 }
+
+/**
+ * Get the status of a slot.
+ * @param {Object} slot - The time slot object.
+ * @returns {Object} The status and tooltip text for the slot.
+ */
+export const getSlotStatus = (
+  slot: Slot,
+  todaysBookedSlots,
+  selectedDate,
+  reservations
+) => {
+  const bookedSlot = todaysBookedSlots?.find(
+    (booked) => booked.slot.start === slot.start && booked.slot.end === slot.end
+  );
+  const currentTime = dayjs().tz(guessTZ);
+  const next24Hours = currentTime.add(24, 'hours');
+
+  const slotStart = dayjs.tz(
+    `${selectedDate.format(DATE_FORMAT)} ${slot.start}`,
+    DATE_TIME_FORMAT,
+    guessTZ
+  );
+  const disabled = slotStart.isBefore(next24Hours);
+
+  if (disabled) {
+    return { isDisabled: true, tooltipText: 'Please book in 24 hours ahead' };
+  }
+
+  if (bookedSlot) {
+    switch (bookedSlot.status) {
+      case ReservationStatus.BOOKED:
+        return {
+          isBooked: true,
+          status: ReservationStatus.BOOKED,
+          tooltipText: TOOLTIP_TEXTS.BOOKED,
+        };
+
+      case ReservationStatus.RESERVED:
+        return {
+          isReserved: true,
+          status: ReservationStatus.RESERVED,
+          tooltipText: TOOLTIP_TEXTS.RESERVED,
+        };
+
+      case ReservationStatus.DISABLED:
+        return {
+          isDisabled: true,
+          status: ReservationStatus.DISABLED,
+          tooltipText: TOOLTIP_TEXTS.DISABLED,
+        };
+
+      case ReservationStatus.AVAILABLE:
+        return {
+          isAvailable: true,
+          status: ReservationStatus.AVAILABLE,
+          tooltipText: TOOLTIP_TEXTS.AVAILABLE,
+        };
+      default:
+        return {};
+    }
+  }
+
+  if (
+    reservations?.find(
+      (reserved) =>
+        reserved.slot.start === slot.start && reserved.slot.end === slot.end
+    )
+  ) {
+    return { isReserved: true, tooltipText: 'Reserved' };
+  }
+  return {};
+};
