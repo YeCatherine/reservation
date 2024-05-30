@@ -1,5 +1,5 @@
 import React from 'react';
-import { Reservation } from '../../utils/reservationService';
+import { Reservation } from '../../types';
 import {
   Card,
   CardContent,
@@ -30,13 +30,17 @@ const Reservations: React.FC = () => {
    * @returns {string} The formatted text for the reservation
    */
   const prepareText = (reservation: Reservation): string => {
-    if ('slots' in reservation) {
+    if (reservation.slots) {
       return reservation.slots
         .map((slot) => `${slot.start} - ${slot.end}`)
         .join(', ');
-    } else {
-      return `Reserved time: ${reservation.slot.start} - ${reservation.slot.end} | Status: ${reservation.status}`;
+    } else if (reservation.slot) {
+      const provider = reservation.providerId
+        ? `| Provider: ${reservation.providerId}`
+        : '';
+      return `Reserved time: ${reservation.slot.start} - ${reservation.slot.end} | Status: ${reservation.status} ${provider}`;
     }
+    return '';
   };
 
   if (reservations.length === 0) {
