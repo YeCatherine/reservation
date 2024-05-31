@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from './context/AuthContext';
 import { Box, Button, Divider, Typography } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
@@ -9,7 +9,7 @@ import { Link, useLocation } from 'react-router-dom';
  * This component displays the login/logout section based on the user's authentication state.
  */
 const LoginSection: React.FC = () => {
-  const { user, login, logout } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
 
   return (
@@ -30,8 +30,7 @@ const LoginSection: React.FC = () => {
             </Typography>
           )}
           <Button
-            color="inherit"
-            variant="outlined"
+            variant="contained"
             size="medium"
             onClick={logout}
             sx={{ marginLeft: 2 }}
@@ -41,7 +40,7 @@ const LoginSection: React.FC = () => {
         </Box>
       ) : (
         location.pathname !== '/login' && (
-          <Button color="inherit" component={Link} to={'/login'}>
+          <Button variant="contained" component={Link} to={'/login'}>
             Sign in
           </Button>
         )

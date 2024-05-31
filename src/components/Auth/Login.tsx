@@ -38,6 +38,7 @@ const Login: React.FC = () => {
         }
       }
     } catch (error) {
+      //tslint:disable-next-line
       if (error.response && error.response.status === 401) {
         alert('Invalid username or password');
       } else {
@@ -138,8 +139,8 @@ const Login: React.FC = () => {
                 color="primary"
                 fullWidth
                 style={{ marginTop: '1rem' }}
-                onClick={() => {
-                  login('provider1', 'provider1');
+                onClick={async () => {
+                  await login('provider1', 'provider1');
                   navigate('/provider');
                 }}
               >
@@ -150,8 +151,8 @@ const Login: React.FC = () => {
                 color="primary"
                 fullWidth
                 style={{ marginTop: '1rem' }}
-                onClick={() => {
-                  login('client1', 'client1');
+                onClick={async () => {
+                  await login('client1', 'client1');
                   navigate('/provider');
                 }}
               >

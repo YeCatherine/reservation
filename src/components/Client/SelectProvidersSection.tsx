@@ -1,6 +1,6 @@
 import { Box, Chip, Grid, Paper, Typography } from '@mui/material';
-import React from 'react';
 import { useReservations } from '../Reservations/context/ReservationContext';
+import { useProvider } from './context/ProviderContext.tsx';
 
 /**
  * SelectProvidersSection component
@@ -9,12 +9,14 @@ import { useReservations } from '../Reservations/context/ReservationContext';
  */
 export function SelectProvidersSection(): JSX.Element | null {
   const { reservation, updateExistingReservation } = useReservations();
+  const { setCurrentProvider } = useProvider();
 
   /**
    * Handle chip click to update the provider for the reservation.
    */
-  const handleChipClick = (id: number | 'provider1') => {
+  const handleChipClick = (id: string) => {
     updateExistingReservation(reservation.id, { providerId: id });
+    setCurrentProvider(id);
   };
 
   /**

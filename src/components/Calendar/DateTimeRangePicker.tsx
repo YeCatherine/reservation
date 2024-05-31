@@ -2,73 +2,113 @@ import React, { useEffect, useState } from 'react';
 import { LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
 import { Button, Grid, TextField } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs, { Dayjs } from 'dayjs';
-import { DATE_TIME_FORMAT } from '../../consts';
+import dayjs, { Dayjs, guessTZ } from '../../utils/dayJs.ts';
+import { DATE_FORMAT, TIME_FORMAT } from '../../consts';
 import { useAuth } from '../Auth/context/AuthContext.tsx';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { updateProvidersAvailability } from '../../utils/providersService.ts';
-import { TimeSlot } from '../../types';
+import { Slot } from '../../types';
 import { useProvider } from '../Client/context/ProviderContext.tsx';
 import { useDay } from './context/DayContext.tsx';
-
+import { prepareTimeSlotPeriod } from '../../utils/timeService.tsx';
+import { styled } from '@mui/system';
 dayjs.extend(isSameOrBefore);
+
+enum ButtonState {
+  create = 'create',
+  update = 'update',
+}
+const FullWidthTimePicker = styled(TimePicker)({
+  width: '100%!important',
+});
+
+type TButtonState = 'create' | 'update';
 
 /**
  * DateTimeRangePicker component
  *
  * A component to select and manage date and time ranges.
  *
- * @param {function} setTimeSlots - Function to set time slots
  * @returns {JSX.Element} The rendered component
  */
 const DateTimeRangePicker: React.FC = (): JSX.Element => {
   const { selectedDate, selectedTimezone } = useDay();
   const { setAvailableSlots, currentDaySlots } = useProvider();
-  const [timeSlot, setTimeSlot] = useState<TimeSlot | null>(currentDaySlots);
+  const [timeSlot, setTimeSlot] = useState<Slot | null>(currentDaySlots);
+  const [creteUpdateFlag, setCreteUpdateFlag] = useState<TButtonState>(
+    ButtonState.create
+  );
 
   useEffect(() => {
     if (currentDaySlots) {
+      setCreteUpdateFlag(ButtonState.update);
       setTimeSlot(currentDaySlots);
     } else {
+      setCreteUpdateFlag(ButtonState.create);
       setTimeSlot(null);
     }
   }, [currentDaySlots, selectedDate]);
 
   const { user } = useAuth();
 
-  const defaultStartTime = selectedDate.hour(8).minute(0);
-  const defaultEndTime = selectedDate.hour(15).minute(0);
-
+  const defaultStartTime = dayjs(selectedDate).tz(guessTZ).hour(8).minute(0);
+  const defaultEndTime = dayjs(selectedDate).tz(guessTZ).hour(15).minute(0);
+  console.log('defaultStartEndTime: ', { defaultStartTime, defaultEndTime });
   /**
    * Handle change of time range.
    * @param {Dayjs | null} newValue - The new time value.
-   * @param {number} index - The index of the time slot
-   * @param {'start' | 'end'} type - The type of time (start or end).
+   * @param {"start" | "end"} type - The type of time (start or end).
    */
   const handleTimeChange = (newValue: Dayjs | null, type: 'start' | 'end') => {
-    setTimeSlot((prev) => {
-      if (!prev) {
-        return {
-          start: type === 'start' ? newValue : defaultStartTime,
-          end: type === 'end' ? newValue : defaultEndTime,
+    try {
+      setTimeSlot((prev) => {
+        // debugger;
+        const newSlot = {
+          start:
+            type === 'start'
+              ? newValue.format(TIME_FORMAT)
+              : prev?.slot[0]?.start || null,
+          end:
+            type === 'end'
+              ? newValue.format(TIME_FORMAT)
+              : prev?.slot[0]?.end || null,
         };
-      }
-      return {
-        ...prev,
-        [type]: newValue,
-      };
-    });
+
+        let newTimeSlot;
+        if (prev) {
+          newTimeSlot = {
+            date: selectedDate.format(DATE_FORMAT),
+            slot: [newSlot],
+          };
+        } else {
+          newTimeSlot = {
+            ...prev,
+            slot: [newSlot],
+          };
+        }
+
+        console.log('new time slot: ', newTimeSlot);
+        return newTimeSlot;
+      });
+    } catch (error) {
+      console.error('Error occurred while updating time slot:', error);
+    }
   };
 
   /**
    * Handle form submission.
    */
   const handleSubmit = async () => {
+    if (!user || !timeSlot) return;
+    setCreteUpdateFlag(ButtonState.update);
+    const { preparedTimeSlotStart, preparedTimeSlotEnd } =
+      prepareTimeSlotPeriod(timeSlot);
+
     const availability = {
-      date: selectedDate.format(DATE_TIME_FORMAT),
+      date: selectedDate.format(DATE_FORMAT),
       timezone: selectedTimezone,
-      start: timeSlot?.start ? timeSlot.start.format('HH:mm') : null,
-      end: timeSlot?.end ? timeSlot.end.format('HH:mm') : null,
+      start: preparedTimeSlotStart?.format(TIME_FORMAT),
+      end: preparedTimeSlotEnd?.format(TIME_FORMAT),
     };
 
     const providerId = user.id;
@@ -76,75 +116,33 @@ const DateTimeRangePicker: React.FC = (): JSX.Element => {
       providerId,
       availability
     );
+
     setAvailableSlots(response);
   };
 
-  const preparedTimeSlotStart = timeSlot?.start || null;
-  const preparedTimeSlotEnd = timeSlot?.end || null;
+  const { preparedTimeSlotStart, preparedTimeSlotEnd } =
+    prepareTimeSlotPeriod(timeSlot);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
-          <TimePicker
+          <FullWidthTimePicker
             label="Start Time"
             value={preparedTimeSlotStart}
             onChange={(newValue) => handleTimeChange(newValue, 'start')}
-            sx={{
-              width: {
-                xs: '100%',
-                md: '100%',
-              },
-              margin: {
-                xs: '0 auto',
-                md: '0 10px',
-                lg: '0',
-              },
-            }}
             renderInput={(params) => (
-              <TextField
-                {...params}
-                data-testid="start-time-picker"
-                sx={{
-                  width: {
-                    xs: '100%', // full width on mobile
-                    md: '200px', // 200px on desktop
-                  },
-                  margin: '0 auto', // center the field
-                }}
-              />
+              <TextField {...params} data-testid="start-time-picker" />
             )}
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <TimePicker
+          <FullWidthTimePicker
             label="End Time"
             value={preparedTimeSlotEnd}
             onChange={(newValue) => handleTimeChange(newValue, 'end')}
-            sx={{
-              width: {
-                xs: '100%',
-                md: '200px',
-              },
-              margin: {
-                xs: '0 auto',
-                md: '0 10px',
-                lg: '0',
-              },
-            }}
             renderInput={(params) => (
-              <TextField
-                {...params}
-                data-testid="end-time-picker"
-                sx={{
-                  width: {
-                    xs: '100%', // full width on mobile
-                    md: '200px', // 200px on desktop
-                  },
-
-                  margin: '0 20px', // center the field
-                }}
-              />
+              <TextField {...params} data-testid="end-time-picker" />
             )}
           />
         </Grid>
@@ -154,9 +152,22 @@ const DateTimeRangePicker: React.FC = (): JSX.Element => {
           timeSlot.end === null ? (
             <Button
               variant="contained"
-              onClick={() =>
-                setTimeSlot({ start: defaultStartTime, end: defaultEndTime })
-              }
+              onClick={() => {
+                setTimeSlot((prev) => {
+                  const newTimeSlot = {
+                    ...prev,
+                    date: selectedDate.format(DATE_FORMAT),
+                    slot: [
+                      {
+                        start: defaultStartTime.format(TIME_FORMAT),
+                        end: defaultEndTime.format(TIME_FORMAT),
+                      },
+                    ],
+                  };
+                  console.log('default time slot: ', newTimeSlot);
+                  return newTimeSlot;
+                });
+              }}
               fullWidth
               data-testid="submit-event-button"
             >
@@ -169,7 +180,7 @@ const DateTimeRangePicker: React.FC = (): JSX.Element => {
               fullWidth
               data-testid="submit-event-button"
             >
-              Submit
+              {creteUpdateFlag === ButtonState.create ? 'Create' : 'Update'}
             </Button>
           )}
         </Grid>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, CardContent, CardHeader, Grid } from '@mui/material';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -9,6 +8,8 @@ import DateTimeRangePicker from '../Calendar/DateTimeRangePicker.tsx';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+// @todo - remove
+// @ts-expect-error
 export default function SelectTimeSlots({ date }) {
   if (!date) {
     return null;

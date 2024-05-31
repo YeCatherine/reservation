@@ -1,4 +1,3 @@
-// src/components/Reservations/context/ReservationContext.tsx
 import React, {
   createContext,
   ReactNode,
@@ -27,10 +26,10 @@ interface ReservationContextProps {
     newReservation: Omit<Reservation, 'id'>
   ) => Promise<Reservation>;
   updateExistingReservation: (
-    id: number,
+    id: string,
     updatedFields: Partial<Reservation>
   ) => Promise<Reservation>;
-  removeReservation: (id: number) => Promise<void>;
+  removeReservation: (id: string) => Promise<void>;
 }
 
 const ReservationContext = createContext<ReservationContextProps | undefined>(
@@ -40,7 +39,7 @@ const ReservationContext = createContext<ReservationContextProps | undefined>(
 export const ReservationProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [reservation, setReservation] = useState<Reservation[]>(null);
+  const [reservation, setReservation] = useState<Reservation[] | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [timer, setTimer] = useState<number | null>(null);
   const { user } = useAuth();
@@ -69,13 +68,14 @@ export const ReservationProvider: React.FC<{ children: ReactNode }> = ({
     updatedFields: Partial<Reservation>
   ): Promise<Reservation> => {
     const updatedReservation = await updateReservation(id, updatedFields);
+
     setReservations((prev) =>
       prev.map((res) => (res.id === id ? updatedReservation : res))
     );
     if (reservation.id === id) {
       // If reservation is confirmed, remove it from the context.
       if (
-        updatedFields.status === ReservationStatus.CONFIRMED ||
+        updatedFields.status === ReservationStatus.BOOKED ||
         updatedFields.status === ReservationStatus.EXPIRED
       ) {
         setReservation(null);
@@ -88,15 +88,6 @@ export const ReservationProvider: React.FC<{ children: ReactNode }> = ({
     return updatedReservation;
   };
 
-  /**
-   * Remove current reservation and remove it from databsase when timer is up.
-   */
-  useEffect(() => {
-    if (timer === 0 && reservation) {
-      removeReservation(reservation.id);
-    }
-  }, [timer]);
-
   const removeReservation = async (id: number): Promise<void> => {
     await deleteReservation(id);
     if (reservation && reservation.id === id) setReservation(null);
@@ -105,8 +96,19 @@ export const ReservationProvider: React.FC<{ children: ReactNode }> = ({
     });
   };
 
+  /**
+   * Remove current reservation and remove it from databsase when timer is up.
+   */
+  useEffect(() => {
+    if (timer === 0 && reservation) {
+      removeReservation(reservation.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timer, reservation]);
+
   useEffect(() => {
     fetchUserReservations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return (
@@ -126,14 +128,17 @@ export const ReservationProvider: React.FC<{ children: ReactNode }> = ({
   );
 };
 
-export default ReservationProvider;
-
+// eslint-disable-next-line
 export const useReservations = () => {
   const context = useContext(ReservationContext);
+
   if (!context) {
     throw new Error(
       'useReservations must be used within a ReservationProvider'
     );
   }
+
   return context;
 };
+
+export default ReservationProvider;

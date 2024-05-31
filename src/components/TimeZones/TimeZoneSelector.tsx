@@ -1,4 +1,3 @@
-import React from 'react';
 import { FormControl, MenuItem, Select } from '@mui/material';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -24,7 +23,7 @@ const TimezoneOptions = [
  *
  * @returns {JSX.Element} The rendered component
  */
-export function TimeZoneSelector(): JSX.Element {
+export default function TimeZoneSelector(): JSX.Element {
   const { selectedTimezone, setSelectedTimezone } = useDay();
   return (
     <FormControl

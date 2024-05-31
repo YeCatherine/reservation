@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, Paper, TextField } from '@mui/material';
-import { TimeZoneSelector } from '../TimeZones/TimeZoneSelector';
+import TimeZoneSelector from '../TimeZones/TimeZoneSelector';
 import { LocalizationProvider, StaticDatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -18,11 +18,11 @@ import { useDay } from './context/DayContext';
  * @param {dayjs.Dayjs} [minDate] - Minimum selectable date
  */
 export function CommonCalendar({
-  schedules,
+  schedules = null,
   minDate = dayjs().add(1, 'day'),
 }: {
-  schedules: Schedule[];
-  minDate?: dayjs.Dayjs;
+  schedules?: Schedule[];
+  minDate?: dayjs.Dayjs | undefined;
 }): JSX.Element {
   const { selectedDate, setSelectedDate } = useDay();
   const [expanded, setExpanded] = useState(true);
@@ -33,20 +33,6 @@ export function CommonCalendar({
   const handleToggleExpand = () => {
     setExpanded(!expanded);
   };
-
-  // Collapse calendar on mobile.
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     if (window.innerWidth <= 600) {
-  //       setExpanded(false);
-  //     } else {
-  //       setExpanded(true);
-  //     }
-  //   };
-  //   window.addEventListener('resize', handleResize);
-  //   handleResize();
-  //   return () => window.removeEventListener('resize', handleResize);
-  // }, []);
 
   return (
     <Card>
@@ -75,7 +61,7 @@ export function CommonCalendar({
                 slotProps={{
                   day: {
                     schedules,
-                  } as any,
+                  },
                 }}
               />
             )}
@@ -85,3 +71,4 @@ export function CommonCalendar({
     </Card>
   );
 }
+export default CommonCalendar;

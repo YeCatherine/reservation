@@ -1,21 +1,17 @@
-import React from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
-import { ALL_PROVIDERS, useProvider } from './context/ProviderContext';
-
+import { useProvider } from './context/ProviderContext';
+import { ALL_PROVIDERS } from '../../consts';
 /**
  * SelectProvider component
  *
  * A component for selecting the current provider from a list.
  *
- * @param {Array} providers - Array of provider objects
  * @returns {JSX.Element} The rendered component
  */
-export function SelectProvider({ providers }) {
-  const { currentProvider, setCurrentProvider } = useProvider<
-    number | 'provider1'
-  >(ALL_PROVIDERS);
+export function SelectProvider() {
+  const { currentProvider, setCurrentProvider, providers } = useProvider();
 
   return (
     <Card>
@@ -27,13 +23,11 @@ export function SelectProvider({ providers }) {
           <Select
             labelId="provider-select-label"
             value={currentProvider}
-            onChange={(e) =>
-              setCurrentProvider(e.target.value as number | 'provider1')
-            }
+            onChange={(e) => setCurrentProvider(e.target.value as string)}
             label="Select Provider"
             sx={{ p: 0, m: 0 }}
           >
-            <MenuItem value="any">Any Provider</MenuItem>
+            <MenuItem value={ALL_PROVIDERS}>Any Provider</MenuItem>
             {providers.map((provider) => (
               <MenuItem key={provider.id} value={provider.id}>
                 {provider.name}
@@ -45,3 +39,5 @@ export function SelectProvider({ providers }) {
     </Card>
   );
 }
+
+export default SelectProvider;

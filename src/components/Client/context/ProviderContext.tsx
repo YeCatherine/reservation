@@ -2,53 +2,88 @@ import React, {
   createContext,
   ReactNode,
   useContext,
+  useCallback,
   useEffect,
   useState,
 } from 'react';
-import { TimeSlot } from '../../../types';
+import { Provider, Reservation, Slot } from '../../../types';
 import {
+  fetchProviders,
   getProviderAvailability,
   getProvidersAvailabilityForExactDay,
 } from '../../../utils/providersService';
 import { useAuth } from '../../Auth/context/AuthContext';
 import { useDay } from '../../Calendar/context/DayContext';
-import { Role } from '../../../consts';
+import { DATE_FORMAT, Role } from '../../../consts';
+import { ALL_PROVIDERS } from '../../../consts';
 
-interface ProviderContextProps<T> {
-  currentProvider: T;
-  setCurrentProvider: (provider: T) => void;
-  availableSlots: TimeSlot[];
-  setAvailableSlots: (slots: TimeSlot[]) => void;
-  currentDaySlots: TimeSlot;
-  setCurrentDaySlots: (slots: TimeSlot) => void;
+interface ProviderContextProps {
+  currentProvider: string;
+  setCurrentProvider: (provider: string) => void;
+  availableSlots: Reservation[];
+  setAvailableSlots: (slots: Reservation[]) => void;
+  currentDaySlots: Slot[];
+  setCurrentDaySlots: (slots: Slot[]) => void;
+  providers: Provider[];
 }
 
-const ProviderContext = createContext<ProviderContextProps<any> | undefined>(
+const ProviderContext = createContext<ProviderContextProps | undefined>(
   undefined
 );
 
-/**
- * ProviderContextProvider component
- *
- * A context provider for managing provider-related state.
- *
- * @param {ReactNode} children - React Child components.
- * @returns {JSX.Element} The rendered component.
- */
 export const ProviderContextProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [currentProvider, setCurrentProvider] = useState<number | 'provider1'>(
-    'provider1'
-  );
-  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>(null);
-  const [currentDaySlots, setCurrentDaySlots] = useState<TimeSlot>([]);
-
+  const [currentProvider, setCurrentProvider] = useState<string>(ALL_PROVIDERS);
+  const [availableSlots, setAvailableSlots] = useState<Slot[]>([]);
+  const [currentDaySlots, setCurrentDaySlots] = useState<Slot[]>([]);
+  const [providers, setProviders] = useState<Provider[]>([]);
   const { user } = useAuth();
   const { selectedDate } = useDay();
 
+  const fetchProvidersData = useCallback(async () => {
+    try {
+      const data = await fetchProviders();
+      setProviders(data);
+    } catch (error) {
+      console.error('Failed to fetch providers:', error);
+    }
+  }, []);
+
+  const fetchProviderAvailability = useCallback(async () => {
+    try {
+      const providersAvailability: Slot[] =
+        await getProviderAvailability(currentProvider);
+
+      setAvailableSlots(providersAvailability);
+
+      const exactDay = getProvidersAvailabilityForExactDay(
+        providersAvailability,
+        selectedDate.format(DATE_FORMAT)
+      );
+      setCurrentDaySlots(exactDay);
+
+      setProviders((prevProviders) => {
+        return prevProviders.map((provider) => {
+          if (provider.id === currentProvider) {
+            return {
+              ...provider,
+              availability: providersAvailability,
+            };
+          }
+          return provider;
+        });
+      });
+    } catch (error) {
+      console.error('Failed to fetch provider availability:', error);
+    }
+  }, [currentProvider, selectedDate]);
+
   useEffect(() => {
-    // Set current provider as current user id if they are a provider.
+    fetchProvidersData();
+  }, [fetchProvidersData]);
+
+  useEffect(() => {
     if (
       user &&
       user.role === Role.Provider &&
@@ -60,24 +95,8 @@ export const ProviderContextProvider: React.FC<{ children: ReactNode }> = ({
   }, [user, currentProvider]);
 
   useEffect(() => {
-    /**
-     * Fetch provider availability data.
-     */
-    async function getData() {
-      const providersAvailability =
-        await getProviderAvailability(currentProvider);
-      setAvailableSlots(providersAvailability);
-
-      const exactDay = getProvidersAvailabilityForExactDay(
-        providersAvailability,
-        selectedDate.format('YYYY-MM-DD')
-      );
-
-      setCurrentDaySlots(exactDay);
-    }
-
-    getData();
-  }, [user, currentProvider, selectedDate]);
+    fetchProviderAvailability();
+  }, [fetchProviderAvailability]);
 
   return (
     <ProviderContext.Provider
@@ -88,6 +107,7 @@ export const ProviderContextProvider: React.FC<{ children: ReactNode }> = ({
         setAvailableSlots,
         currentDaySlots,
         setCurrentDaySlots,
+        providers,
       }}
     >
       {children}
@@ -95,29 +115,14 @@ export const ProviderContextProvider: React.FC<{ children: ReactNode }> = ({
   );
 };
 
-export const ALL_PROVIDERS = 'provider1';
-
-/**
- * useProvider hook
- *
- * A hook to use the provider context.
- *
- * @param {T} defaultValue - The default value for the provider.
- * @returns {ProviderContextProps<T>} The provider context.
- */
-export const useProvider = <T,>(defaultValue: T) => {
+export const useProvider = () => {
   const context = useContext(ProviderContext);
+
   if (!context) {
     throw new Error(
       'useProvider must be used within a ProviderContextProvider'
     );
   }
-  return {
-    currentProvider: context.currentProvider as T,
-    setCurrentProvider: context.setCurrentProvider as (provider: T) => void,
-    availableSlots: context.availableSlots,
-    setAvailableSlots: context.setAvailableSlots,
-    currentDaySlots: context.currentDaySlots,
-    setCurrentDaySlots: context.setCurrentDaySlots,
-  };
+
+  return context;
 };

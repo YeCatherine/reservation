@@ -1,4 +1,3 @@
-// DayContext.tsx
 import React, {
   createContext,
   Dispatch,
@@ -24,13 +23,9 @@ interface CurrentDayContextType {
   setSelectedTimezone: Dispatch<SetStateAction<string>>;
 }
 
-type TimeZoneContextType = {
-  selectedTimezone: string;
-  setSelectedTimezone: Dispatch<SetStateAction<string>>;
-};
-
 const DayContext = createContext<CurrentDayContextType | undefined>(undefined);
 
+// eslint-disable-next-line
 export const useDay = (): CurrentDayContextType => {
   const context = useContext(DayContext);
   if (!context) {

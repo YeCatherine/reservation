@@ -1,14 +1,9 @@
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 import axios from 'axios';
-
-interface User {
-  id: string;
-  name: string;
-  role: string;
-}
+import { User } from '../../../types';
 
 interface AuthContextProps {
-  user: User;
+  user?: User | null;
   userType: string;
   login: (username: string, password: string) => Promise<void>;
   register: (
@@ -27,7 +22,7 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // @todo remove that hardcoded user.
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [userType, setUserType] = useState('');
 
   const login = async (username: string, password: string) => {
@@ -66,6 +61,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

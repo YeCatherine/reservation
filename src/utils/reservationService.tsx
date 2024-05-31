@@ -1,13 +1,17 @@
 import axios from 'axios';
-import dayjs from 'dayjs';
-import { Reservation, Slot } from '../types';
+import { Reservation } from '../types';
 
 /**
  * Fetch all reservations.
  * @returns {Promise<Reservation[]>} A promise that resolves to an array of reservations.
  */
-export const fetchReservations = async (): Promise<Reservation[]> => {
-  const response = await axios.get('/api/reservations');
+export const fetchReservations = async (date = ''): Promise<Reservation[]> => {
+  let response;
+  if (date === '') {
+    response = await axios.get(`/api/reservations`);
+  } else {
+    response = await axios.get(`/api/reservations?date=${date}`);
+  }
   return response.data.reservations;
 };
 
@@ -44,38 +48,4 @@ export const updateReservation = async (
  */
 export const deleteReservation = async (id: number): Promise<void> => {
   await axios.delete(`/api/reservations/${id}`);
-};
-
-/**
- * Format a date and time string.
- * @param {string} dateTime - The date and time string to format.
- * @returns {string} The formatted date and time string.
- */
-export const formatDateTime = (dateTime: string): string => {
-  return dayjs(dateTime).format('YYYY-MM-DD HH:mm');
-};
-
-/**
- * Create a new time slot.
- * @param {string} start - The start time of the slot.
- * @param {string} end - The end time of the slot.
- * @returns {Slot} The created slot.
- */
-export const createSlot = (start: string, end: string): Slot => {
-  return {
-    start,
-    end,
-    disabled: false,
-    selected: false,
-  };
-};
-
-/**
- * Update an existing time slot.
- * @param {Slot} slot - The slot to update.
- * @param {Partial<Slot>} updatedFields - The fields to update.
- * @returns {Slot} The updated slot.
- */
-export const updateSlot = (slot: Slot, updatedFields: Partial<Slot>): Slot => {
-  return { ...slot, ...updatedFields };
 };
