@@ -30,8 +30,7 @@ const LoginSection: React.FC = () => {
             </Typography>
           )}
           <Button
-            color="inherit"
-            variant="outlined"
+            variant="contained"
             size="medium"
             onClick={logout}
             sx={{ marginLeft: 2 }}
@@ -41,7 +40,7 @@ const LoginSection: React.FC = () => {
         </Box>
       ) : (
         location.pathname !== '/login' && (
-          <Button color="inherit" component={Link} to={'/login'}>
+          <Button variant="contained" component={Link} to={'/login'}>
             Sign in
           </Button>
         )

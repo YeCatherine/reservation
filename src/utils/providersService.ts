@@ -67,7 +67,7 @@ export async function updateProvidersAvailability(
     const response2 = mergeProviderData(data).sort((a, b) =>
       dayjs(a.date).isAfter(dayjs(b.date)) ? 1 : -1
     ) as Reservation[];
-    console.log('update:', response.data, response2);
+
     return response2;
   } catch (error) {
     console.error('Error submitting availability:', error);

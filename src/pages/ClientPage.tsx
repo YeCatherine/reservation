@@ -84,12 +84,10 @@ const ClientPage: React.FC = () => {
     reservations,
   ]);
 
-  /**
-   * @brief Fetches providers and their schedules on component mount.
-   */
-  // useEffect(() => {
-  //   fetchProviders(setProviders, setSchedules);
-  // }, []);
+  useEffect(() => {
+    // Clear the selected slot when the date changes.
+    setCurrentSelectedSlot(null);
+  }, [selectedDate]);
 
   /**
    * @brief Handles the before unload event to warn the user about unsaved changes.
@@ -130,16 +128,16 @@ const ClientPage: React.FC = () => {
         clearInterval(intervalId);
       }
 
+      let timerValue = timer;
       const newIntervalId = setInterval(() => {
-        setTimer((prev) => {
-          if (prev !== null && prev > 0) {
-            return prev - 1;
-          } else {
-            clearInterval(newIntervalId);
-            setCurrentSelectedSlot(null);
-            return null;
-          }
-        });
+        if (timerValue !== null && timerValue > 0) {
+          timerValue -= 1;
+          setTimer(timerValue);
+        } else {
+          clearInterval(newIntervalId);
+          setCurrentSelectedSlot(null);
+          setTimer(null);
+        }
       }, 1000);
 
       let selectedProvider = null;

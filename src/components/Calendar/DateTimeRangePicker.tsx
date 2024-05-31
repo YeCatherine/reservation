@@ -11,13 +11,16 @@ import { Slot } from '../../types';
 import { useProvider } from '../Client/context/ProviderContext.tsx';
 import { useDay } from './context/DayContext.tsx';
 import { prepareTimeSlotPeriod } from '../../utils/timeService.tsx';
-
+import { styled } from '@mui/system';
 dayjs.extend(isSameOrBefore);
 
 enum ButtonState {
   create = 'create',
   update = 'update',
 }
+const FullWidthTimePicker = styled(TimePicker)({
+  width: '100%!important',
+});
 
 type TButtonState = 'create' | 'update';
 
@@ -124,30 +127,22 @@ const DateTimeRangePicker: React.FC = (): JSX.Element => {
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
-          <TimePicker
+          <FullWidthTimePicker
             label="Start Time"
             value={preparedTimeSlotStart}
             onChange={(newValue) => handleTimeChange(newValue, 'start')}
             renderInput={(params) => (
-              <TextField
-                {...params}
-                data-testid="start-time-picker"
-                sx={{ width: { xs: '100%', md: '200px' }, margin: '0 auto' }}
-              />
+              <TextField {...params} data-testid="start-time-picker" />
             )}
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <TimePicker
+          <FullWidthTimePicker
             label="End Time"
             value={preparedTimeSlotEnd}
             onChange={(newValue) => handleTimeChange(newValue, 'end')}
             renderInput={(params) => (
-              <TextField
-                {...params}
-                data-testid="end-time-picker"
-                sx={{ width: { xs: '100%', md: '200px' }, margin: '0 auto' }}
-              />
+              <TextField {...params} data-testid="end-time-picker" />
             )}
           />
         </Grid>
