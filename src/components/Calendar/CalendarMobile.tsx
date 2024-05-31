@@ -12,6 +12,21 @@ import { useDay } from './context/DayContext';
 
 dayjs.extend(isSameOrBefore);
 
+type TCalendarMobileProps = {
+  /**
+   * Determines if the component is expanded
+   */
+  expanded: boolean;
+  /**
+   * Function to toggle the component's expanded state
+   */
+  handleToggleExpand: () => void;
+  /**
+   * The minimum date allowed to be selected
+   */
+  minDate: dayjs.Dayjs | null;
+};
+
 /**
  * DateSelector component
  *
@@ -21,11 +36,11 @@ dayjs.extend(isSameOrBefore);
  * @param {() => void} handleToggleExpand - Function to toggle the component's expanded state
  * @param {dayjs.Dayjs | null} minDate - The minimum date allowed to be selected
  */
-const DateSelector: React.FC<{
-  expanded: boolean;
-  handleToggleExpand: () => void;
-  minDate: dayjs.Dayjs | null;
-}> = ({ expanded, handleToggleExpand, minDate }) => {
+const CalendarMobile: React.FC<TCalendarMobileProps> = ({
+  expanded,
+  handleToggleExpand,
+  minDate,
+}) => {
   const { selectedDate, setSelectedDate } = useDay();
   const [allowPreviousDay, setAllowPreviousDay] = useState(true);
 
@@ -73,4 +88,4 @@ const DateSelector: React.FC<{
   );
 };
 
-export default DateSelector;
+export default CalendarMobile;

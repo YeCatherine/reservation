@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { Provider, Slot } from '../../../types';
+import { Provider, Reservation, Slot } from '../../../types';
 import {
   fetchProviders,
   getProviderAvailability,
@@ -20,20 +20,20 @@ import { ALL_PROVIDERS } from '../../../consts';
 interface ProviderContextProps {
   currentProvider: string;
   setCurrentProvider: (provider: string) => void;
-  availableSlots: Slot[];
-  setAvailableSlots: (slots: Slot[]) => void;
+  availableSlots: Reservation[];
+  setAvailableSlots: (slots: Reservation[]) => void;
   currentDaySlots: Slot[];
   setCurrentDaySlots: (slots: Slot[]) => void;
   providers: Provider[];
 }
 
 const ProviderContext = createContext<ProviderContextProps | undefined>(
-    undefined
+  undefined
 );
 
 export const ProviderContextProvider: React.FC<{ children: ReactNode }> = ({
-                                                                             children,
-                                                                           }) => {
+  children,
+}) => {
   const [currentProvider, setCurrentProvider] = useState<string>(ALL_PROVIDERS);
   const [availableSlots, setAvailableSlots] = useState<Slot[]>([]);
   const [currentDaySlots, setCurrentDaySlots] = useState<Slot[]>([]);
@@ -52,12 +52,14 @@ export const ProviderContextProvider: React.FC<{ children: ReactNode }> = ({
 
   const fetchProviderAvailability = useCallback(async () => {
     try {
-      const providersAvailability: Slot[] = await getProviderAvailability(currentProvider);
+      const providersAvailability: Slot[] =
+        await getProviderAvailability(currentProvider);
+
       setAvailableSlots(providersAvailability);
 
       const exactDay = getProvidersAvailabilityForExactDay(
-          providersAvailability,
-          selectedDate.format(DATE_FORMAT)
+        providersAvailability,
+        selectedDate.format(DATE_FORMAT)
       );
       setCurrentDaySlots(exactDay);
     } catch (error) {
@@ -71,10 +73,10 @@ export const ProviderContextProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     if (
-        user &&
-        user.role === Role.Provider &&
-        user.id &&
-        currentProvider !== user.id
+      user &&
+      user.role === Role.Provider &&
+      user.id &&
+      currentProvider !== user.id
     ) {
       setCurrentProvider(user.id);
     }
@@ -85,19 +87,19 @@ export const ProviderContextProvider: React.FC<{ children: ReactNode }> = ({
   }, [fetchProviderAvailability]);
 
   return (
-      <ProviderContext.Provider
-          value={{
-            currentProvider,
-            setCurrentProvider,
-            availableSlots,
-            setAvailableSlots,
-            currentDaySlots,
-            setCurrentDaySlots,
-            providers,
-          }}
-      >
-        {children}
-      </ProviderContext.Provider>
+    <ProviderContext.Provider
+      value={{
+        currentProvider,
+        setCurrentProvider,
+        availableSlots,
+        setAvailableSlots,
+        currentDaySlots,
+        setCurrentDaySlots,
+        providers,
+      }}
+    >
+      {children}
+    </ProviderContext.Provider>
   );
 };
 
@@ -105,7 +107,9 @@ export const useProvider = () => {
   const context = useContext(ProviderContext);
 
   if (!context) {
-    throw new Error('useProvider must be used within a ProviderContextProvider');
+    throw new Error(
+      'useProvider must be used within a ProviderContextProvider'
+    );
   }
 
   return context;

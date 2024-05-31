@@ -2,13 +2,8 @@ import { createServer, Model, Response } from 'miragejs';
 import { nanoid } from 'nanoid';
 import dayjs from 'dayjs';
 import { Provider, Reservation, Slot, User } from '../types';
-import {
-  ALL_PROVIDERS,
-  DATE_FORMAT,
-  DEFAULT_TIMEZONE,
-  ReservationStatus,
-} from '../consts';
-// @ts-nocheck
+import { ALL_PROVIDERS, DATE_FORMAT, ReservationStatus } from '../consts';
+
 /**
  * Mirage js sever to emulate server on dev mode.
  */
@@ -76,6 +71,7 @@ export function makeServer({ environment = 'development' } = {}) {
         },
         status: ReservationStatus.RESERVED,
       });
+
       server.create('reservation', {
         id: nanoid(),
         clientId: 'client2',
@@ -87,6 +83,7 @@ export function makeServer({ environment = 'development' } = {}) {
         },
         status: ReservationStatus.RESERVED,
       });
+
       server.create('reservation', {
         id: nanoid(),
         clientId: 'client2',
@@ -105,25 +102,25 @@ export function makeServer({ environment = 'development' } = {}) {
         availability: [
           {
             date: dayjs().format(DATE_FORMAT),
-            timezone: 'PST',
+            timezone: 'America/Los_Angeles',
             start: '08:00',
             end: '15:00',
           },
           {
             date: dayjs().add(1, 'day').format(DATE_FORMAT),
-            timezone: 'PST',
-            start: '08:00',
-            end: '15:00',
+            timezone: 'America/Los_Angeles',
+            start: '09:15',
+            end: '14:15',
           },
           {
             date: dayjs().add(2, 'day').format(DATE_FORMAT),
-            timezone: 'PST',
+            timezone: 'America/Los_Angeles',
             start: '08:00',
             end: '15:00',
           },
           {
             date: dayjs().add(10, 'day').format(DATE_FORMAT),
-            timezone: 'PST',
+            timezone: 'America/Los_Angeles',
             start: '08:00',
             end: '15:00',
           },
@@ -136,31 +133,31 @@ export function makeServer({ environment = 'development' } = {}) {
         availability: [
           {
             date: dayjs().format(DATE_FORMAT),
-            timezone: 'PST',
+            timezone: 'America/Los_Angeles',
             start: '09:00',
             end: '15:00',
           },
           {
             date: dayjs().add(1, 'day').format(DATE_FORMAT),
-            timezone: 'PST',
+            timezone: 'America/Los_Angeles',
             start: '08:00',
             end: '15:00',
           },
           {
             date: dayjs().add(2, 'day').format(DATE_FORMAT),
-            timezone: 'PST',
+            timezone: 'America/Los_Angeles',
             start: '10:00',
             end: '15:00',
           },
           {
             date: dayjs().add(3, 'day').format(DATE_FORMAT),
-            timezone: 'PST',
+            timezone: 'America/Los_Angeles',
             start: '08:00',
             end: '14:00',
           },
           {
             date: dayjs().add(15, 'day').format(DATE_FORMAT),
-            timezone: 'PST',
+            timezone: 'America/Los_Angeles',
             start: '08:00',
             end: '15:00',
           },
@@ -239,7 +236,8 @@ export function makeServer({ environment = 'development' } = {}) {
               return dayjs(a.date).unix() - dayjs(b.date).unix();
             }
           );
-          return provider.availability;
+          // return provider.availability;
+          return { id: provider.availability };
         } else {
           return new Response(
             404,
@@ -261,7 +259,8 @@ export function makeServer({ environment = 'development' } = {}) {
           });
 
           providerAvailability[provider.id] = provider.availability;
-          return provider.availability;
+          // return provider.availability;
+          return { id: provider.availability };
         } else {
           return new Response(
             404,
@@ -270,15 +269,6 @@ export function makeServer({ environment = 'development' } = {}) {
           );
         }
       });
-
-      // this.post('/reservations', (schema, request) => {
-      //   let attrs = JSON.parse(request.requestBody);
-      //   return schema.reservations.create(attrs);
-      // });
-      //
-      // this.get('/reservations', (schema) => {
-      //   return schema.reservations.all();
-      // });
 
       this.get('/schedules', (schema) => {
         const schedules = schema.schedules.all().models;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, Paper, TextField } from '@mui/material';
-import { TimeZoneSelector } from '../TimeZones/TimeZoneSelector';
+import TimeZoneSelector from '../TimeZones/TimeZoneSelector';
 import { LocalizationProvider, StaticDatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -71,3 +71,4 @@ export function CommonCalendar({
     </Card>
   );
 }
+export default CommonCalendar;

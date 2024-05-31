@@ -11,7 +11,7 @@ export interface Slot {
   id?: string;
   start: Dayjs | string;
   end: Dayjs | string;
-  date: Dayjs | string;  // Ensure date property is included
+  date: Dayjs | string; // Ensure date property is included
   status?: TReservationStatus;
   timezone?: string;
   /**
@@ -26,7 +26,7 @@ export interface Reservation {
   providerId: string | number;
   date: string;
   // @todo merge to 1 param
-  slot?: Slot;
+  slot?: Slot[];
   timer?: number | null;
   status: TReservationStatus;
   expirationTime?: Dayjs | string;

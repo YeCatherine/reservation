@@ -7,9 +7,18 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-interface DebugPanelProps {
+export interface DebugPanelProps {
+  /**
+   * Data to display in the debug panel.
+   */
   data: Record<string, unknown>;
+  /**
+   * Title of the debug panel (optional).
+   */
   title?: string;
+  /**
+   * Whether the debug panel is expanded by default (optional).
+   */
   expanded?: boolean;
 }
 

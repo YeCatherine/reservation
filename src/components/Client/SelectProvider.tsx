@@ -39,3 +39,5 @@ export function SelectProvider() {
     </Card>
   );
 }
+
+export default SelectProvider;

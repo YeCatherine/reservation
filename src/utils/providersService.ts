@@ -30,14 +30,16 @@ export const getProviderAvailability = async (
   try {
     if (!providerId) return null;
 
-    const response = await fetch(`/api/providers/${providerId}/availability`);
-    const data = (await response.json()) as TProvidersArray;
+    const response = await axios.get(
+      `/api/providers/${providerId}/availability`
+    );
+    const data = response.data as TProvidersArray;
 
     // Sort the data by date.
     const response2 = mergeProviderData(data).sort((a, b) =>
       dayjs(a.date).isAfter(dayjs(b.date)) ? 1 : -1
     ) as Reservation[];
-    console.log({ response2 });
+
     return response2;
   } catch (error) {
     console.error('Error fetching time slots:', error);
@@ -45,17 +47,28 @@ export const getProviderAvailability = async (
   }
 };
 
+/**
+ * Update provider availability
+ * @param providerId
+ * @param availability
+ */
 export async function updateProvidersAvailability(
   providerId: string,
   availability
-) {
+): Promise<Reservation[] | null> {
   try {
     const response = await axios.post(
       `/api/providers/${providerId}/availability`,
       availability
     );
+    const data = response.data as TProvidersArray;
+
     toast('Availability submitted successfully');
-    return response.data;
+    const response2 = mergeProviderData(data).sort((a, b) =>
+      dayjs(a.date).isAfter(dayjs(b.date)) ? 1 : -1
+    ) as Reservation[];
+    console.log('update:', response.data, response2);
+    return response2;
   } catch (error) {
     console.error('Error submitting availability:', error);
     toast.error('Error submitting availability');

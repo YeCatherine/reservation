@@ -1,104 +1,103 @@
+import React, { useCallback } from 'react';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import { Button, Divider, List, ListItem, ListItemText } from '@mui/material';
-import dayjs, { Dayjs } from 'dayjs';
-import { useProvider } from '../Client/context/ProviderContext.tsx';
-import { deleteProviderAvailability } from '../../utils/providersService.ts';
+import dayjs from 'dayjs';
+import { useProvider } from '../Client/context/ProviderContext';
+import { deleteProviderAvailability } from '../../utils/providersService';
+import { Reservation } from '../../types';
+import { DATE_TIME_FORMAT_LONG, TIME_FORMAT_AM_PM } from '../../consts';
+import { prepareTimeSlotPeriod } from '../../utils/timeService';
 
-import { Slot } from '../../types';
-import {
-  DATE_TIME_FORMAT,
-  DATE_TIME_FORMAT_LONG,
-} from '../../consts';
-
-const prepareSlotPeriodText = (slot: Slot): string => {
-  const start =
-      typeof slot.start === 'string'
-          ? slot.start
-          : dayjs(slot.start).format('HH:mm');
-  const end =
-      typeof slot.end === 'string'
-          ? slot.end
-          : dayjs(slot.end).format('HH:mm');
-
-  if (slot.date !== null) {
-    const startTime = dayjs(`${slot.date} ${start}`, DATE_TIME_FORMAT).format(
-        'h A'
-    );
-    const endTime = dayjs(`${slot.date} ${end}`, DATE_TIME_FORMAT).format(
-        'h A'
-    );
-
-    return `${startTime} - ${endTime}`;
-  } else {
+export const prepareSlotPeriodText = (slot: Reservation): string => {
+  const { preparedTimeSlotStart, preparedTimeSlotEnd } =
+    prepareTimeSlotPeriod(slot);
+  if (!preparedTimeSlotStart || !preparedTimeSlotEnd)
     return 'no date available';
-  }
+
+  const startTime = preparedTimeSlotStart.format(TIME_FORMAT_AM_PM);
+  const endTime = preparedTimeSlotEnd.format(TIME_FORMAT_AM_PM);
+  return `${startTime} - ${endTime} | ${slot.slot[0].timezone}`;
 };
 
-const formatPrimaryText = (slot: Slot): string => {
-  const date =
-      typeof slot.date === 'string' ? dayjs(slot.date) : dayjs(slot.date);
-  return `${date.format(DATE_TIME_FORMAT_LONG)}`;
+const formatPrimaryText = (slot: Reservation): string => {
+  const date = typeof slot.date === 'string' ? dayjs(slot.date) : slot.date;
+  return date.format(DATE_TIME_FORMAT_LONG);
+};
+
+const styles = {
+  cardContent: {
+    pr: 1,
+    pl: 1,
+    pt: 0,
+    m: 0,
+    '&:last-child': { paddingBottom: 0 },
+  },
+  listItem: {
+    borderBottom: '1px solid #ccc',
+    padding: 1,
+    backgroundColor: 'primary',
+  },
 };
 
 /**
  * Display all submitted schedules.
+ * @param setSchedules
  * @constructor
  */
-export function SubmittedSchedules() {
+const SubmittedSchedules = React.memo(() => {
   const { availableSlots, setAvailableSlots, currentProvider } = useProvider();
+  console.log('availableSlots: ', availableSlots);
 
-  if (!availableSlots || availableSlots.length === 0) {
+  if (!availableSlots || Object.keys(availableSlots).length === 0) {
     return null;
   }
 
-  const handleDelete = async (date: string | Dayjs) => {
-    try {
-      await deleteProviderAvailability(currentProvider, date);
-      setAvailableSlots(availableSlots.filter((slot) => slot.date !== date));
-    } catch (error) {
-      console.error('Error occurred while deleting availability:', error);
-    }
-  };
+  /**
+   * Handle delete availability.
+   */
+  const handleDelete = useCallback(
+    async (date: string | Date) => {
+      try {
+        await deleteProviderAvailability(currentProvider, date);
 
-  console.log('availableSlots', { availableSlots });
+        setAvailableSlots((prev: Reservation[]) =>
+          prev.filter((slot) => slot.date !== date)
+        );
+      } catch (error) {
+        console.error('Error occurred while deleting availability:', error);
+      }
+    },
+    [currentProvider, setAvailableSlots]
+  );
 
   return (
-      <Card>
-        <CardHeader title="Working Schedule" subheader="TimeZone (PST)" />
-        <CardContent
-            sx={{ pr: 1, pl: 1, pt: 0, m: 0, '&:last-child': { paddingBottom: 0 } }}
-        >
-          <Divider />
-          <List>
-            {availableSlots.map((slot, index) => (
-                <ListItem
-                    key={index}
-                    sx={{
-                      borderBottom: '1px solid #ccc',
-                      padding: 1,
-                      backgroundColor: 'primary',
-                    }}
-                >
-                  <ListItemText
-                      primary={formatPrimaryText(slot)}
-                      secondary={prepareSlotPeriodText(slot)}
-                  />
-                  <Button
-                      variant="outlined"
-                      color="secondary"
-                      size="small"
-                      onClick={() => handleDelete(slot.date)}
-                  >
-                    Delete
-                  </Button>
-                </ListItem>
-            ))}
-          </List>
-        </CardContent>
-      </Card>
+    <Card>
+      <CardHeader title="Working Schedule" subheader="TimeZone (PST)" />
+      <CardContent sx={styles.cardContent}>
+        <Divider />
+        <List>
+          {availableSlots.map((slot: Reservation, index) => (
+            <ListItem key={index} sx={styles.listItem}>
+              <ListItemText
+                primary={formatPrimaryText(slot)}
+                secondary={prepareSlotPeriodText(slot)}
+              />
+              <Button
+                variant="outlined"
+                color="secondary"
+                size="small"
+                onClick={() => handleDelete(slot.date)}
+              >
+                Delete
+              </Button>
+            </ListItem>
+          ))}
+        </List>
+      </CardContent>
+    </Card>
   );
-}
+});
 
 export default SubmittedSchedules;

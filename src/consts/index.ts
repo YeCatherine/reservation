@@ -2,6 +2,8 @@ export const DATE_FORMAT = 'YYYY-MM-DD';
 export const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm';
 export const DATE_TIME_FORMAT_LONG = 'dddd, Do of MMMM';
 export const TIME_FORMAT = 'HH:mm';
+export const TIME_FORMAT_AM_PM = 'h:mm A';
+
 export const DEFAULT_TIMEZONE = 'PST';
 
 export const ALL_PROVIDERS = 'all_providers';

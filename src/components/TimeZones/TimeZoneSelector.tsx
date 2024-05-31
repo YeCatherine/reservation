@@ -23,7 +23,7 @@ const TimezoneOptions = [
  *
  * @returns {JSX.Element} The rendered component
  */
-export function TimeZoneSelector(): JSX.Element {
+export default function TimeZoneSelector(): JSX.Element {
   const { selectedTimezone, setSelectedTimezone } = useDay();
   return (
     <FormControl

@@ -8,7 +8,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { SubmittedSchedules } from '../components/Provider/SubmittedProviderSchedules.tsx';
+import SubmittedSchedules from '../components/Provider/SubmittedProviderSchedules.tsx';
 import { useAuth } from '../components/Auth/context/AuthContext.tsx';
 import NoAccess from './NoAccess.tsx';
 import PageLayout from '../components/ui/PageLayout.tsx';
