@@ -105,24 +105,52 @@ export function makeServer({ environment = 'development' } = {}) {
             timezone: 'America/Los_Angeles',
             start: '08:00',
             end: '15:00',
+            slot: [
+              {
+                timezone: 'America/Los_Angeles',
+                start: '08:00',
+                end: '15:00',
+              },
+            ],
           },
           {
             date: dayjs().add(1, 'day').format(DATE_FORMAT),
             timezone: 'America/Los_Angeles',
             start: '09:15',
             end: '14:15',
+            slot: [
+              {
+                timezone: 'America/Los_Angeles',
+                start: '09:15',
+                end: '14:15',
+              },
+            ],
           },
           {
             date: dayjs().add(2, 'day').format(DATE_FORMAT),
             timezone: 'America/Los_Angeles',
             start: '08:00',
             end: '15:00',
+            slot: [
+              {
+                timezone: 'America/Los_Angeles',
+                start: '08:00',
+                end: '15:00',
+              },
+            ],
           },
           {
             date: dayjs().add(10, 'day').format(DATE_FORMAT),
             timezone: 'America/Los_Angeles',
             start: '08:00',
             end: '15:00',
+            slot: [
+              {
+                timezone: 'America/Los_Angeles',
+                start: '08:00',
+                end: '15:00',
+              },
+            ],
           },
         ],
       });
@@ -293,26 +321,13 @@ export function makeServer({ environment = 'development' } = {}) {
         // add possibility to search by date;
         const { date } = request.queryParams;
         if (date) {
+          const testDate = schema.reservations.all().models;
+          console.log('all reservations', testDate);
           return schema.reservations.where((r) => r.date === date);
         } else {
           return schema.reservations.all();
         }
       });
-
-      //
-      // this.get('/reservations', (schema, request) => {
-      //   let { userId, providerId } = request.queryParams;
-      //   let reservations = schema.reservations.all().models;
-      //
-      //   if (userId) {
-      //     reservations = reservations.filter(reservation => reservation.clientId == userId);
-      //   }
-      //   if (providerId) {
-      //     reservations = reservations.filter(reservation => reservation.providerId == providerId);
-      //   }
-      //
-      //   return { reservations };
-      // });
 
       this.post('/reservations', (schema, request) => {
         const attrs = JSON.parse(request.requestBody);

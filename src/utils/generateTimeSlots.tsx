@@ -1,20 +1,16 @@
 import { Provider, Reservation, Slot } from '../types';
-import dayjs from 'dayjs';
+import dayjs, { guessTZ } from './dayJs.ts';
 import {
   DATE_FORMAT,
   DATE_TIME_FORMAT,
   ReservationStatus,
+  TIME_FORMAT,
   TOOLTIP_TEXTS,
 } from '../consts';
-
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
 import { fetchReservations } from './reservationService.tsx';
+import { prepareTimeSlotPeriod } from './timeService.tsx';
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
-
-const guessTZ = dayjs.tz.guess();
+import { useDay } from '../components/Calendar/context/DayContext.tsx';
 
 /**
  * Generate client-specific time slots for a given day.
@@ -25,7 +21,8 @@ const guessTZ = dayjs.tz.guess();
 export async function generateClientTimeSlotsForDay(
   providers: Provider[],
   date: string,
-  reservations: Reservation[]
+  reservations: Reservation[],
+  selectedTimezone: string
 ): Slot[] {
   const todaysBookedSlots = await fetchReservations(date);
 
@@ -55,6 +52,8 @@ export async function generateClientTimeSlotsForDay(
 
   providers.forEach((provider) => {
     const availability = provider.availability.find((av) => av.date === date);
+
+    // const availability = findAvaiablePeriodByDay(provider, date);
     if (availability) {
       availabilityMap.set(provider.id, availability);
     }
@@ -71,10 +70,16 @@ export async function generateClientTimeSlotsForDay(
   if (!commonAvailability) {
     return result; // No common availability found
   }
-
+  const { preparedTimeSlotStart, preparedTimeSlotEnd } = prepareTimeSlotPeriod(
+    commonAvailability,
+    selectedTimezone
+  );
+  // debugger;
   const intervals = generateIntervals(
-    commonAvailability.start,
-    commonAvailability.end
+    preparedTimeSlotStart?.format(TIME_FORMAT),
+    preparedTimeSlotEnd?.format(TIME_FORMAT)
+    // commonAvailability.start,
+    // commonAvailability.end
   );
 
   intervals.forEach(([start, end]) => {

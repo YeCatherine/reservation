@@ -70,8 +70,10 @@ const ClientPage: React.FC = () => {
       const data = await generateClientTimeSlotsForDay(
         filteredProviders,
         selectedDate.format(DATE_FORMAT),
-        reservations
+        reservations,
+        selectedTimezone
       );
+
       setAvailableClientSlots(data);
     })();
   }, [

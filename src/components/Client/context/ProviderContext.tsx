@@ -62,6 +62,18 @@ export const ProviderContextProvider: React.FC<{ children: ReactNode }> = ({
         selectedDate.format(DATE_FORMAT)
       );
       setCurrentDaySlots(exactDay);
+
+      setProviders((prevProviders) => {
+        return prevProviders.map((provider) => {
+          if (provider.id === currentProvider) {
+            return {
+              ...provider,
+              availability: providersAvailability,
+            };
+          }
+          return provider;
+        });
+      });
     } catch (error) {
       console.error('Failed to fetch provider availability:', error);
     }

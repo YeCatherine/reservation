@@ -71,20 +71,18 @@ const DateTimeRangePicker: React.FC = (): JSX.Element => {
               : prev?.slot[0]?.end || null,
         };
 
-        debugger;
         let newTimeSlot;
-if(prev){
-  newTimeSlot = {
-    date: selectedDate.format(DATE_FORMAT),
-    slot: [newSlot]
-  };
-}else{
-  newTimeSlot = {
-    ...prev,
-    slot:  [newSlot]
-  };
-}
-
+        if (prev) {
+          newTimeSlot = {
+            date: selectedDate.format(DATE_FORMAT),
+            slot: [newSlot],
+          };
+        } else {
+          newTimeSlot = {
+            ...prev,
+            slot: [newSlot],
+          };
+        }
 
         console.log('new time slot: ', newTimeSlot);
         return newTimeSlot;
@@ -103,7 +101,6 @@ if(prev){
     const { preparedTimeSlotStart, preparedTimeSlotEnd } =
       prepareTimeSlotPeriod(timeSlot);
 
-    debugger;
     const availability = {
       date: selectedDate.format(DATE_FORMAT),
       timezone: selectedTimezone,

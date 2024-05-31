@@ -15,6 +15,7 @@ import { useDay } from '../Calendar/context/DayContext';
 import { Slot } from '../../types';
 import { ReservationStatus } from '../../consts';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useProvider } from './context/ProviderContext.tsx';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
